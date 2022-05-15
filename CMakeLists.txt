@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
-project(MyAimbotESP)
+project(crack-world)
 
 set(CMAKE_CXX_STANDARD 14)
-set(MODULE_NAME MyAimbotESP)
+set(MODULE_NAME cw)
 
 include_directories(. $ENV{DXSDK_DIR}Include)
 link_directories("$ENV{DXSDK_DIR}/Lib/x86")
