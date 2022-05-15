@@ -1,17 +1,26 @@
 #include "includes.h"
 #include "hack.h"
 
+const double PI = 3.14159265358;
+
 extern Hack* hack;
 
 void Hack::Init() {
     client = (uintptr_t)GetModuleHandle("client.dll");
     engine = (uintptr_t)GetModuleHandle("engine.dll");
     entityList = (EntityList*)(client + dwEntityList);
-    localEntity = *(Entity**)(client + dwLocalPlayer);
 }
 
 void Hack::Update() {
     memcpy(&viewMatrix, (PBYTE*)(client + dwViewMatrix), sizeof(viewMatrix));
+    localEntity = *(Entity**)(client + dwLocalPlayer);
+    if (localEntity != nullptr) {
+        crosshair2D.x = windowWidth / 2 - (windowWidth / 90 * localEntity->aimPunchAngle.y);
+        crosshair2D.y = windowHeight / 2 + (windowHeight / 90 * localEntity->aimPunchAngle.x);
+    } else {
+        hack->crosshair2D.x = windowWidth / 2;
+        hack->crosshair2D.y = windowHeight / 2;
+    }
 }
 
 bool Hack::CheckValidEntity(Entity *entity) const {

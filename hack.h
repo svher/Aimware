@@ -21,7 +21,7 @@ public:
         DEFINE_MEMBER_N(int, iTeamNum, m_iTeamNum);
         DEFINE_MEMBER_N(uint32_t, dwBoneMatrix, m_dwBoneMatrix);
         DEFINE_MEMBER_N(Vec3, vecViewOffset, m_vecViewOffset)
-        DEFINE_MEMBER_N(int, ArmorValue, m_ArmorValue);
+        DEFINE_MEMBER_N(int, armorValue, m_ArmorValue);
         DEFINE_MEMBER_N(Vec3, aimPunchAngle, m_aimPunchAngle);
     };
     Vec3* GetBonePos(int boneId) const;
@@ -48,7 +48,7 @@ public:
     float viewMatrix[16];
 
     Vec2 crosshair2D;
-    int crosshairSize;
+    int crosshairSize = 4;
 
     ID3DXLine* LineL;
 

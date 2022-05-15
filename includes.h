@@ -7,11 +7,11 @@
 #include <iostream>
 #include <cmath>
 
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+
 #include "csgo.h"
 #include "dx.h"
 #include "vector.h"
 #include "drawing.h"
 #include "hook.h"
 #include "hack.h"
-
-const double PI = 3.14159265358;
