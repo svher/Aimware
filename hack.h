@@ -12,32 +12,6 @@
 using namespace hazedumper::netvars;
 using namespace hazedumper::signatures;
 
-class Vec2 {
-public:
-    float x, y;
-};
-
-class Vec3 {
-public:
-    float x, y, z;
-
-    Vec3() = default;
-    Vec3(float x, float y, float z) {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-    }
-
-    float Norm2D() const {
-        return sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
-    }
-};
-
-class Vec4 {
-public:
-    float x, y, z, w;
-};
-
 class Entity {
 public:
     union {
@@ -47,6 +21,8 @@ public:
         DEFINE_MEMBER_N(int, iTeamNum, m_iTeamNum);
         DEFINE_MEMBER_N(uint32_t, dwBoneMatrix, m_dwBoneMatrix);
         DEFINE_MEMBER_N(Vec3, vecViewOffset, m_vecViewOffset)
+        DEFINE_MEMBER_N(int, ArmorValue, m_ArmorValue);
+        DEFINE_MEMBER_N(Vec3, aimPunchAngle, m_aimPunchAngle);
     };
     Vec3* GetBonePos(int boneId) const;
 };
@@ -70,6 +46,15 @@ public:
     Entity* localEntity;
     EntityList* entityList;
     float viewMatrix[16];
+
+    Vec2 crosshair2D;
+    int crosshairSize;
+
+    ID3DXLine* LineL;
+
+    ~Hack() {
+        LineL->Release();
+    }
 
     void Init();
     // update view matrix

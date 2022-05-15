@@ -61,6 +61,7 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
 }
 
 VOID WINAPI DllDetach() {
+    delete(hack);
     fclose((FILE*)stdin);
     fclose((FILE*)stdout);
     HWND hwConsole = GetConsoleWindow();
