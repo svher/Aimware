@@ -23,6 +23,7 @@ bool Hook(BYTE *src, const BYTE *dst, unsigned int len) {
     return true;
 }
 
+// x86 Trampoline Hook
 BYTE * TrampHook(BYTE *src, BYTE *dst, unsigned int len) {
     if (len < 5) {
         return nullptr;
