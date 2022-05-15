@@ -42,3 +42,7 @@ void DrawEspBox2D(Vec2 top, Vec2 bottom, float thickness, D3DCOLOR color) {
     DrawLine(tl, bl, thickness, color);
     DrawLine(tr, br, thickness, color);
 }
+
+void DrawEspBox3D(Vec3 top, Vec3 bot, float a, int width, float thickness, D3DCOLOR color) {
+
+}

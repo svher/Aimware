@@ -7,7 +7,10 @@
 #include <iostream>
 #include <cmath>
 
+const float PI = 3.14159265358;
 #define ABS(x) ((x) < 0 ? -(x) : (x))
+#define TORAD(x) ((x)*PI/180)
+#define W2S(x, y) hack->WorldToScreen(x, y)
 
 #include "csgo.h"
 #include "dx.h"

@@ -19,55 +19,68 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
         }
         D3DCOLOR color;
         if (entity->iTeamNum == hack->localEntity->iTeamNum) {
+            if (!hack->settings.showTeammates) {
+                continue;
+            }
             color = D3DCOLOR_ARGB(255, 0, 255, 0);
         } else {
             color = D3DCOLOR_ARGB(255, 255, 0, 0);
         }
         Vec2 pos2D{};
-        if (hack->WorldToScreen(entity->vecOrigin, pos2D)) {
-            // snapLine
-            // DrawLine(pos2D.x, pos2D.y, windowWidth / 2, windowHeight, 2, color);
+        if (W2S(entity->vecOrigin, pos2D)) {
+            if (hack->settings.snapLines) {
+                DrawLine(pos2D.x, pos2D.y, windowWidth / 2, windowHeight, 2, color);
+            }
 
             Vec2 head2D{};
-            Vec3 entPos = *entity->GetBonePos(8);
-            entPos.z += 8;
-            if (hack->WorldToScreen(entPos, head2D)) {
-                DrawEspBox2D(head2D, pos2D, 2, color);
-                float height = ABS(head2D.y - pos2D.y);
-                double dx = head2D.x - pos2D.x;
-                double healthPerc = entity->iHealth / 100.f;
-                double armorPerc = entity->armorValue / 100.f;
+            Vec3 head3D = *entity->GetBonePos(8);
+            head3D.z += 8;
+            if (W2S(head3D, head2D)) {
+                if (hack->settings.box2D) {
+                    DrawEspBox2D(head2D, pos2D, 2, color);
+                }
 
-                Vec2 botHealth{}, topHealth{}, botArmor{}, topArmor{};
-                float healthHeight = height * healthPerc;
-                float armorHeight = height * armorPerc;
+                if (hack->settings.box3D) {
+                    DrawEspBox3D(head3D, entity->vecOrigin, entity->angEyeAnglesY, 25, 2, color);
+                }
 
-                botHealth.y = botArmor.y = pos2D.y;
-                botHealth.x = pos2D.x + height / 4 + 2;
-                botArmor.x = pos2D.x - height / 4 - 2;
-                topHealth.y = pos2D.y - healthHeight;
-                topArmor.y = pos2D.y - armorHeight;
-                topHealth.x = botHealth.x + dx * healthPerc;
-                topArmor.x = botArmor.x + dx * armorPerc;
+                if (hack->settings.status2D) {
+                    float height = ABS(head2D.y - pos2D.y);
+                    double dx = head2D.x - pos2D.x;
+                    double healthPerc = entity->iHealth / 100.f;
+                    double armorPerc = entity->armorValue / 100.f;
 
-                DrawLine(topHealth, botHealth, 2, D3DCOLOR_ARGB(255, 46, 139, 87));
-                DrawLine(topArmor, botArmor, 2, D3DCOLOR_ARGB(255, 30, 144, 255));
+                    Vec2 botHealth{}, topHealth{}, botArmor{}, topArmor{};
+                    float healthHeight = height * healthPerc;
+                    float armorHeight = height * armorPerc;
+
+                    botHealth.y = botArmor.y = pos2D.y;
+                    botHealth.x = pos2D.x + height / 4 + 2;
+                    botArmor.x = pos2D.x - height / 4 - 2;
+                    topHealth.y = pos2D.y - healthHeight;
+                    topArmor.y = pos2D.y - armorHeight;
+                    topHealth.x = botHealth.x + dx * healthPerc;
+                    topArmor.x = botArmor.x + dx * armorPerc;
+
+                    DrawLine(topHealth, botHealth, 2, D3DCOLOR_ARGB(255, 46, 139, 87));
+                    DrawLine(topArmor, botArmor, 2, D3DCOLOR_ARGB(255, 30, 144, 255));
+                }
             }
         }
     }
 
-    // DrawFilledRect(windowWidth / 2 - 2, windowHeight / 2, 4, 4, D3DCOLOR_ARGB(255, 255, 255, 255));
     // crossHair
+    if (hack->settings.rcsCrossHair) {
+        Vec2 l{}, r{}, t{}, b{};
+        l = r = t = b = hack->crosshair2D;
+        l.x -= hack->crosshairSize;
+        r.x += hack->crosshairSize;
+        b.y += hack->crosshairSize;
+        t.y -= hack->crosshairSize;
 
-    Vec2 l{}, r{}, t{}, b{};
-    l = r = t = b = hack->crosshair2D;
-    l.x -= hack->crosshairSize;
-    r.x += hack->crosshairSize;
-    b.y += hack->crosshairSize;
-    t.y -= hack->crosshairSize;
-
-    DrawLine(l, r, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
-    DrawLine(t, b, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+        DrawLine(l, r, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+        DrawLine(t, b, 2, D3DCOLOR_ARGB(255, 255, 255, 255));
+    }
 
     oEndScene(pDevice);
 }

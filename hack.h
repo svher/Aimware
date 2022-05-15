@@ -15,14 +15,22 @@ using namespace hazedumper::signatures;
 class Entity {
 public:
     union {
+        // is player far away?
         DEFINE_MEMBER_N(bool, isDormant, m_bDormant);
         DEFINE_MEMBER_N(int, iHealth, m_iHealth);
         DEFINE_MEMBER_N(Vec3, vecOrigin, m_vecOrigin);
         DEFINE_MEMBER_N(int, iTeamNum, m_iTeamNum);
+        // where the head is?
         DEFINE_MEMBER_N(uint32_t, dwBoneMatrix, m_dwBoneMatrix);
+        // player view from origin
         DEFINE_MEMBER_N(Vec3, vecViewOffset, m_vecViewOffset)
         DEFINE_MEMBER_N(int, armorValue, m_ArmorValue);
+        // recoil
         DEFINE_MEMBER_N(Vec3, aimPunchAngle, m_aimPunchAngle);
+        DEFINE_MEMBER_N(float, angEyeAnglesX, m_angEyeAnglesX);
+        DEFINE_MEMBER_N(float, angEyeAnglesY, m_angEyeAnglesY);
+        DEFINE_MEMBER_N(Vec3, vecVelocity, m_vecVelocity);
+        DEFINE_MEMBER_N(bool, bHasHelmet, m_bHasHelmet);
     };
     Vec3* GetBonePos(int boneId) const;
 };
@@ -51,9 +59,11 @@ public:
     int crosshairSize = 4;
 
     ID3DXLine* LineL;
+    ID3DXFont* FontF;
 
     ~Hack() {
         LineL->Release();
+        FontF->Release();
     }
 
     void Init();
@@ -64,6 +74,17 @@ public:
     Entity* GetClosetEnemy();
     void AimAt(Vec3 *target);
     Vec3* GetViewAngles() const;
+    Vec3 TransformVec(Vec3 src, Vec3 dst, float distance);
     // aimbot
     void Run();
+
+    struct Settings {
+        bool showTeammates = true;
+        bool snapLines = true;
+        bool box2D = true;
+        bool status2D = true;
+        bool statusText = true;
+        bool box3D = true;
+        bool rcsCrossHair = true;
+    } settings;
 };

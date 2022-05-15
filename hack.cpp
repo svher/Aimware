@@ -1,8 +1,6 @@
 #include "includes.h"
 #include "hack.h"
 
-const double PI = 3.14159265358;
-
 extern Hack* hack;
 
 void Hack::Init() {
@@ -82,8 +80,8 @@ void Hack::AimAt(Vec3 *target) {
                          localEntity->vecOrigin.z + localEntity->vecViewOffset.z);
     Vec3 deltaVec = Vec3(target->x - myPos.x, target->y - myPos.y, target->z - myPos.z);
     float deltaVecLength = deltaVec.Norm2D();
-    auto pitch = float(-asin(deltaVec.z / deltaVecLength) * (180 / PI));
-    auto yaw = float(atan2(deltaVec.y, deltaVec.x) * (180 / PI));
+    auto pitch = -asinf(deltaVec.z / deltaVecLength) * (180 / PI);
+    auto yaw = atan2f(deltaVec.y, deltaVec.x) * (180 / PI);
 
     Vec3* viewAngles = GetViewAngles();
 
@@ -121,4 +119,14 @@ Entity *Hack::GetClosetEnemy() {
         return nullptr;
     }
     return entityList->entities[closetDistanceIndex].entity;
+}
+
+Vec3 Hack::TransformVec(Vec3 src, Vec3 angle, float distance) {
+    Vec3 newPos{};
+    // yaw
+    newPos.x = src.x + cosf(TORAD(angle.y)) * distance;
+    newPos.y = src.y + sinf(TORAD(angle.y)) * distance;
+    // pitch
+    newPos.z = src.z + tanf(TORAD(angle.x)) * distance;
+    return newPos;
 }
