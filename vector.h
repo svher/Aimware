@@ -32,6 +32,10 @@ public:
         return Vec3{x + other.x, y + other.y, z + other.z};
     }
 
+    Vec3 operator*(float operand) const {
+        return Vec3{x * operand, y * operand, z * operand};
+    }
+
     Vec3 CalcAngles(const Vec3& other) const {
         Vec3 deltaVec = other - *this;
 

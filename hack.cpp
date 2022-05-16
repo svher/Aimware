@@ -62,7 +62,7 @@ bool Hack::WorldToScreen(Vec3 position, Vec2 &screen) {
 void Hack::Run() {
     float closetFOV = 10000;
     float closetDistanceIndex = -1;
-    int localPlayerId = GetLocalPlayerId();
+    int localEntityId = GetLocalEntityId();
     Vec3 closetDeltaAngle{};
     Vec3 *viewAngle = GetViewAngles();
     for (int i = 1; i < 32; i++) {
@@ -73,7 +73,7 @@ void Hack::Run() {
         if (currentEntity->iTeamNum == localEntity->iTeamNum) {
             continue;
         }
-        if (!(currentEntity->bSpottedByMask & (1 << localPlayerId))) {
+        if (!(currentEntity->bSpottedByMask & (1 << localEntityId))) {
             continue;
         }
         Vec3 localViewPos = localEntity->vecViewOffset + localEntity->vecOrigin;
@@ -128,6 +128,6 @@ Vec3 Hack::TransformVec(Vec3 src, Vec3 angle, float distance) {
     return newPos;
 }
 
-int Hack::GetLocalPlayerId() const {
-    return *(int*)(*(uintptr_t*)(client + dwClientState) + dwClientState_GetLocalPlayer);
+int Hack::GetLocalEntityId() const {
+    return *(int*)(*(uintptr_t*)(engine + dwClientState) + dwClientState_GetLocalPlayer);
 }

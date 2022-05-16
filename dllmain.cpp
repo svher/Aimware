@@ -1,5 +1,6 @@
 ﻿// dllmain.cpp : 定义 DLL 应用程序的入口点。
 #include "includes.h"
+#include <sstream>
 
 void* d3d9Device[119];
 BYTE EndSceneByte[7]{ 0 };
@@ -11,6 +12,8 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
     if (!pDevice) {
         pDevice = o_pDevice;
     }
+
+    DrawTextWrapper("ESP HACK SUPER LEGIT", windowWidth / 2, windowHeight - 20, D3DCOLOR_ARGB(255, 255, 255, 255));
 
     for (int i = 1; i < 32; i++) {
         Entity* entity = hack->entityList->entities[i].entity;
@@ -32,19 +35,37 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
                 DrawLine(pos2D.x, pos2D.y, windowWidth / 2, windowHeight, 2, color);
             }
 
+            if (hack->settings.velocityEsp) {
+                Vec3 velOff = entity->vecOrigin + entity->vecVelocity * 0.25f;
+                Vec2 velOff2D;
+                if (W2S(velOff, velOff2D)) {
+                    DrawLine(pos2D, velOff2D, 2, color);
+                    DrawFilledRect(velOff2D.x - 2, velOff2D.y - 2, 4, 4, color);
+                }
+            }
+
             Vec2 head2D{};
             Vec3 head3D = *entity->GetBonePos(8);
             head3D.z += 8;
             if (W2S(head3D, head2D)) {
-                if (hack->settings.box2D) {
-                    DrawEspBox2D(head2D, pos2D, 2, color);
-                }
-
                 if (hack->settings.box3D) {
                     DrawEspBox3D(head3D, entity->vecOrigin, entity->angEyeAnglesY, 25, 2, color);
+                    std::stringstream s1, s2;
+                    s1 << "hp: " << entity->iHealth;
+                    s2 << "ap: " << entity->armorValue;
+                    std::string t1 = s1.str();
+                    std::string t2 = s2.str();
+                    DrawTextWrapper(t1.c_str(), pos2D.x, pos2D.y, D3DCOLOR_ARGB(255, 255, 255, 255));
+                    DrawTextWrapper(t2.c_str(), pos2D.x, pos2D.y + 12, D3DCOLOR_ARGB(255, 255, 255, 255));
+                    if (entity->bHasHelmet) {
+                        DrawTextWrapper("has helmet", pos2D.x, pos2D.y + 24, D3DCOLOR_ARGB(255, 255, 255, 255));
+                    } else {
+                        DrawTextWrapper("no helmet", pos2D.x, pos2D.y + 24, D3DCOLOR_ARGB(255, 255, 255, 255));
+                    }
                 }
 
-                if (hack->settings.status2D) {
+                if (hack->settings.box2D) {
+                    DrawEspBox2D(head2D, pos2D, 2, color);
                     float height = ABS(head2D.y - pos2D.y);
                     double dx = head2D.x - pos2D.x;
                     double healthPerc = entity->iHealth / 100.f;
@@ -64,6 +85,17 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
 
                     DrawLine(topHealth, botHealth, 2, D3DCOLOR_ARGB(255, 46, 139, 87));
                     DrawLine(topArmor, botArmor, 2, D3DCOLOR_ARGB(255, 30, 144, 255));
+                }
+
+                if (hack->settings.headline3D) {
+                    head3D.z -= 8;
+                    Vec3 angAngles{entity->angEyeAnglesX, entity->angEyeAnglesY, 0};
+                    Vec3 endPoint = hack->TransformVec(head3D, angAngles, 60);
+                    Vec2 endPoint2D;
+                    if (W2S(endPoint, endPoint2D) && W2S(head3D, head2D)) {
+                        DrawLine(head2D, endPoint2D, 2, color);
+                    }
+                    head3D.z += 8;
                 }
             }
         }

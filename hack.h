@@ -63,15 +63,19 @@ public:
     ID3DXFont* FontF;
 
     ~Hack() {
-        LineL->Release();
-        FontF->Release();
+        if (LineL != nullptr) {
+            LineL->Release();
+        }
+        if (FontF != nullptr) {
+            FontF->Release();
+        }
     }
 
     void Init();
     // update view matrix
     void Update();
     bool CheckValidEntity(Entity* entity) const;
-    int GetLocalPlayerId() const;
+    int GetLocalEntityId() const;
     bool WorldToScreen(Vec3 position, Vec2& screen);
     void AimAt(Vec3 *target);
     Vec3* GetViewAngles() const;
@@ -81,11 +85,12 @@ public:
 
     struct Settings {
         bool showTeammates = true;
-        bool snapLines = true;
-        bool box2D = true;
-        bool status2D = true;
+        bool snapLines = false;
+        bool box2D = false;
         bool statusText = true;
         bool box3D = true;
         bool rcsCrossHair = true;
+        bool headline3D = false;
+        bool velocityEsp = true;
     } settings;
 };
