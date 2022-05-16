@@ -31,6 +31,7 @@ public:
         DEFINE_MEMBER_N(float, angEyeAnglesY, m_angEyeAnglesY);
         DEFINE_MEMBER_N(Vec3, vecVelocity, m_vecVelocity);
         DEFINE_MEMBER_N(bool, bHasHelmet, m_bHasHelmet);
+        DEFINE_MEMBER_N(uint32_t, bSpottedByMask, m_bSpottedByMask);
     };
     Vec3* GetBonePos(int boneId) const;
 };
@@ -70,8 +71,8 @@ public:
     // update view matrix
     void Update();
     bool CheckValidEntity(Entity* entity) const;
+    int GetLocalPlayerId() const;
     bool WorldToScreen(Vec3 position, Vec2& screen);
-    Entity* GetClosetEnemy();
     void AimAt(Vec3 *target);
     Vec3* GetViewAngles() const;
     Vec3 TransformVec(Vec3 src, Vec3 dst, float distance);

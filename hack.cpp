@@ -60,9 +60,32 @@ bool Hack::WorldToScreen(Vec3 position, Vec2 &screen) {
 }
 
 void Hack::Run() {
-    Entity* closetEnemy = GetClosetEnemy();
-    if (closetEnemy) {
-        hack->AimAt(closetEnemy->GetBonePos(8));
+    float closetFOV = 10000;
+    float closetDistanceIndex = -1;
+    int localPlayerId = GetLocalPlayerId();
+    Vec3 closetDeltaAngle{};
+    Vec3 *viewAngle = GetViewAngles();
+    for (int i = 1; i < 32; i++) {
+        Entity* currentEntity = entityList->entities[i].entity;
+        if (!CheckValidEntity(currentEntity)) {
+            continue;
+        }
+        if (currentEntity->iTeamNum == localEntity->iTeamNum) {
+            continue;
+        }
+        if (!(currentEntity->bSpottedByMask & (1 << localPlayerId))) {
+            continue;
+        }
+        Vec3 localViewPos = localEntity->vecViewOffset + localEntity->vecOrigin;
+        Vec3 deltaAngle = localViewPos.CalcAngles(*currentEntity->GetBonePos(8)) - *viewAngle;
+        if (deltaAngle.Norm2D() < closetFOV) {
+            closetDeltaAngle = deltaAngle;
+        }
+    }
+    if (!closetDeltaAngle.isZero()) {
+        Vec3 newAngle = closetDeltaAngle + *viewAngle;
+        viewAngle->x = newAngle.x;
+        viewAngle->y = newAngle.y;
     }
 }
 
@@ -78,7 +101,7 @@ void Hack::AimAt(Vec3 *target) {
     Vec3 myPos = Vec3(localEntity->vecOrigin.x + localEntity->vecViewOffset.x,
                          localEntity->vecOrigin.y + localEntity->vecViewOffset.y,
                          localEntity->vecOrigin.z + localEntity->vecViewOffset.z);
-    Vec3 deltaVec = Vec3(target->x - myPos.x, target->y - myPos.y, target->z - myPos.z);
+    Vec3 deltaVec = *target - myPos;
     float deltaVecLength = deltaVec.Norm2D();
     auto pitch = -asinf(deltaVec.z / deltaVecLength) * (180 / PI);
     auto yaw = atan2f(deltaVec.y, deltaVec.x) * (180 / PI);
@@ -95,32 +118,6 @@ Vec3 *Hack::GetViewAngles() const {
     return (Vec3*)(*(uintptr_t*)(hack->engine + dwClientState) + dwClientState_ViewAngles);
 }
 
-Entity *Hack::GetClosetEnemy() {
-    float closetDistance = 10000;
-    int closetDistanceIndex = -1;
-    for (int i = 1; i < 32; i++) {
-        Entity* currentEntity = entityList->entities[i].entity;
-        if (!CheckValidEntity(currentEntity)) {
-            continue;
-        }
-        if (currentEntity->iTeamNum == localEntity->iTeamNum) {
-            continue;
-        }
-        Vec3 myPos = localEntity->vecOrigin;
-        Vec3 enemyPos = currentEntity->vecOrigin;
-        Vec3 delta = Vec3(enemyPos.x - myPos.x, enemyPos.y - myPos.y, enemyPos.z - myPos.z);
-        float currentDistance = delta.Norm2D();
-        if (currentDistance < closetDistance) {
-            closetDistance = currentDistance;
-            closetDistanceIndex = i;
-        }
-    }
-    if (closetDistanceIndex == -1) {
-        return nullptr;
-    }
-    return entityList->entities[closetDistanceIndex].entity;
-}
-
 Vec3 Hack::TransformVec(Vec3 src, Vec3 angle, float distance) {
     Vec3 newPos{};
     // yaw
@@ -129,4 +126,8 @@ Vec3 Hack::TransformVec(Vec3 src, Vec3 angle, float distance) {
     // pitch
     newPos.z = src.z + tanf(TORAD(angle.x)) * distance;
     return newPos;
+}
+
+int Hack::GetLocalPlayerId() const {
+    return *(int*)(*(uintptr_t*)(client + dwClientState) + dwClientState_GetLocalPlayer);
 }
