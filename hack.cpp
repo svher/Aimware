@@ -61,7 +61,6 @@ bool Hack::WorldToScreen(Vec3 position, Vec2 &screen) {
 
 void Hack::Run() {
     float closetFOV = 10000;
-    float closetDistanceIndex = -1;
     int localEntityId = GetLocalEntityId();
     Vec3 closetDeltaAngle{};
     Vec3 *viewAngle = GetViewAngles();
@@ -130,4 +129,17 @@ Vec3 Hack::TransformVec(Vec3 src, Vec3 angle, float distance) {
 
 int Hack::GetLocalEntityId() const {
     return *(int*)(*(uintptr_t*)(engine + dwClientState) + dwClientState_GetLocalPlayer);
+}
+
+void Hack::CheckButtons() {
+#define CHECK_BTN_STATUS(name) if (GetAsyncKeyState(buttons.name##Btn) & 1) { settings.name = !settings.name; }
+    CHECK_BTN_STATUS(showMenu);
+    CHECK_BTN_STATUS(showTeammates);
+    CHECK_BTN_STATUS(snapLines);
+    CHECK_BTN_STATUS(box2D);
+    CHECK_BTN_STATUS(box3D);
+    CHECK_BTN_STATUS(velocityEsp);
+    CHECK_BTN_STATUS(headline3D);
+    CHECK_BTN_STATUS(rcsCrossHair);
+    CHECK_BTN_STATUS(aimBot);
 }
