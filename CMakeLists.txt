@@ -7,11 +7,8 @@ set(MODULE_NAME cw)
 include_directories(. $ENV{DXSDK_DIR}Include)
 link_directories("$ENV{DXSDK_DIR}/Lib/x86")
 
-add_library(${MODULE_NAME} SHARED
-        dllmain.cpp
-        drawing.cpp
-        dx.cpp
-        hook.cpp
-        hack.cpp)
+aux_source_directory(. SRC_DIR)
+
+add_library(${MODULE_NAME} SHARED ${SRC_DIR})
 
 target_link_libraries(${MODULE_NAME} d3d9 d3dx9)

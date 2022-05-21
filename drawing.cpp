@@ -47,14 +47,14 @@ void DrawEspBox3D(Vec3 top, Vec3 bot, float a, float width, float thickness, D3D
     float height = top.z - bot.z;
     Vec3 b1, b2, b3, b4, t1, t2, t3, t4;
     b1.z = b2.z = b3.z = b4.z = bot.z;
-    b1.x = bot.x + cos(TORAD(a + 45)) * width;
-    b1.y = bot.y + sin(TORAD(a + 45)) * width;
-    b2.x = bot.x + cos(TORAD(a + 135)) * width;
-    b2.y = bot.y + sin(TORAD(a + 135)) * width;
-    b3.x = bot.x + cos(TORAD(a + 225)) * width;
-    b3.y = bot.y + sin(TORAD(a + 225)) * width;
-    b4.x = bot.x + cos(TORAD(a + 315)) * width;
-    b4.y = bot.y + sin(TORAD(a + 315)) * width;
+    b1.x = bot.x + cos(TO_RAD(a + 45)) * width;
+    b1.y = bot.y + sin(TO_RAD(a + 45)) * width;
+    b2.x = bot.x + cos(TO_RAD(a + 135)) * width;
+    b2.y = bot.y + sin(TO_RAD(a + 135)) * width;
+    b3.x = bot.x + cos(TO_RAD(a + 225)) * width;
+    b3.y = bot.y + sin(TO_RAD(a + 225)) * width;
+    b4.x = bot.x + cos(TO_RAD(a + 315)) * width;
+    b4.y = bot.y + sin(TO_RAD(a + 315)) * width;
 
     t1.z = t2.z = t3.z = t4.z = top.z;
     t1.x = b1.x;

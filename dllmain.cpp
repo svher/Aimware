@@ -12,6 +12,10 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
     if (!pDevice) {
         pDevice = o_pDevice;
     }
+    if (hack->stop) {
+        oEndScene(o_pDevice);
+        return;
+    }
 
     DrawTextWrapper("ESP HACK SUPER LEGIT", windowWidth / 2, windowHeight - 20, D3DCOLOR_ARGB(255, 255, 255, 255));
     int menuOffX = windowWidth / 2;
@@ -169,6 +173,10 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
         hack->CheckButtons();
         if (hack->settings.aimBot) {
             hack->Run();
+        }
+        // TODO: call it from createMove
+        if (GetAsyncKeyState(VK_HOME) & 1) {
+            hack->TraceRay();
         }
     }
 

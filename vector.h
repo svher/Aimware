@@ -36,6 +36,21 @@ public:
         return Vec3{x * operand, y * operand, z * operand};
     }
 
+    Vec3& operator=(const Vec3& other) {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    float LengthSqr() const {
+        return x*x + y*y + z*z;
+    }
+
+    void Clear() {
+        x = y = z = 0;
+    }
+
     Vec3 CalcAngles(const Vec3& other) const {
         Vec3 deltaVec = other - *this;
 
@@ -44,6 +59,18 @@ public:
 
         return Vec3{ pitch, yaw, 0 };
     }
+};
+
+class Vec3Aligned : public Vec3 {
+public:
+    // IMPORTANT: don't make this a virtual function
+    Vec3Aligned& operator=(const Vec3& other) {
+        this->x = other.x;
+        this->y = other.y;
+        this->z = other.z;
+        return *this;
+    }
+    float w;
 };
 
 class Vec4 {

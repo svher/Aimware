@@ -7,6 +7,9 @@ void Hack::Init() {
     client = (uintptr_t)GetModuleHandle("client.dll");
     engine = (uintptr_t)GetModuleHandle("engine.dll");
     entityList = (EntityList*)(client + dwEntityList);
+    createInterface = (CreateInterfaceFn)GetProcAddress((HMODULE)engine, "CreateInterface");
+    engineTrace = (IEngineTrace*)createInterface(INTERFACEVERSION_ENGINETRACE_CLIENT, NULL);
+    stop = false;
 }
 
 void Hack::Update() {
@@ -65,18 +68,18 @@ void Hack::Run() {
     Vec3 closetDeltaAngle{};
     Vec3 *viewAngle = GetViewAngles();
     for (int i = 1; i < 32; i++) {
-        Entity* currentEntity = entityList->entities[i].entity;
-        if (!CheckValidEntity(currentEntity)) {
+        Entity* entity = entityList->entities[i].entity;
+        if (!CheckValidEntity(entity)) {
             continue;
         }
-        if (currentEntity->iTeamNum == localEntity->iTeamNum) {
+        if (entity->iTeamNum == localEntity->iTeamNum) {
             continue;
         }
-        if (!(currentEntity->bSpottedByMask & (1 << localEntityId))) {
+        if (!(entity->bSpottedByMask & (1 << localEntityId))) {
             continue;
         }
         Vec3 localViewPos = localEntity->vecViewOffset + localEntity->vecOrigin;
-        Vec3 deltaAngle = localViewPos.CalcAngles(*currentEntity->GetBonePos(8)) - *viewAngle;
+        Vec3 deltaAngle = localViewPos.CalcAngles(*entity->GetBonePos(8)) - *viewAngle;
         if (deltaAngle.Norm2D() < closetFOV) {
             closetDeltaAngle = deltaAngle;
         }
@@ -85,6 +88,27 @@ void Hack::Run() {
         Vec3 newAngle = closetDeltaAngle + *viewAngle;
         viewAngle->x = newAngle.x;
         viewAngle->y = newAngle.y;
+    }
+}
+
+void Hack::TraceRay() {
+    if (localEntity == nullptr) {
+        return;
+    }
+    for (int i = 1; i < 32; i++) {
+        Entity* entity = entityList->entities[i].entity;
+        if (!CheckValidEntity(entity)) {
+            continue;
+        }
+        CGameTrace trace{};
+        Ray_t ray{};
+        CTraceFilter traceFilter;
+        traceFilter.pSkip = localEntity;
+        ray.Init(localEntity->vecOrigin + localEntity->vecViewOffset, *entity->GetBonePos(8));
+        engineTrace->TraceRay(ray, MASK_SHOT | CONTENTS_GRATE, &traceFilter, &trace);
+        if (entity == trace.m_pEnt) {
+            std::cout << "Ent 0x" << std::hex << entity << std::endl;
+        }
     }
 }
 
@@ -120,10 +144,10 @@ Vec3 *Hack::GetViewAngles() const {
 Vec3 Hack::TransformVec(Vec3 src, Vec3 angle, float distance) {
     Vec3 newPos{};
     // yaw
-    newPos.x = src.x + cosf(TORAD(angle.y)) * distance;
-    newPos.y = src.y + sinf(TORAD(angle.y)) * distance;
+    newPos.x = src.x + cosf(TO_RAD(angle.y)) * distance;
+    newPos.y = src.y + sinf(TO_RAD(angle.y)) * distance;
     // pitch
-    newPos.z = src.z + tanf(TORAD(angle.x)) * distance;
+    newPos.z = src.z + tanf(TO_RAD(angle.x)) * distance;
     return newPos;
 }
 

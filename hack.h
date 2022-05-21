@@ -62,12 +62,20 @@ public:
     ID3DXLine* LineL;
     ID3DXFont* FontF;
 
+    bool stop = false;
+
+    CreateInterfaceFn createInterface;
+    IEngineTrace *engineTrace;
+
     ~Hack() {
+        stop = true;
         if (LineL != nullptr) {
             LineL->Release();
+            LineL = nullptr;
         }
         if (FontF != nullptr) {
             FontF->Release();
+            FontF = nullptr;
         }
     }
 
@@ -126,4 +134,6 @@ public:
             D3DCOLOR headline = D3DCOLOR_ARGB(255, 0, 255, 255);
         } enemy;
     } colors;
+
+    void TraceRay();
 };
