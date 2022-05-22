@@ -121,7 +121,7 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
                     if (hack->settings.headline3D) {
                         head3D.z -= 8;
                         Vec3 angAngles{entity->angEyeAnglesX, entity->angEyeAnglesY, 0};
-                        Vec3 endPoint = hack->TransformVec(head3D, angAngles, 60);
+                        Vec3 endPoint = TransformVec(head3D, angAngles, 60);
                         Vec2 endPoint2D;
                         if (W2S(endPoint, endPoint2D) && W2S(head3D, head2D)) {
                             DrawLine(head2D, endPoint2D, 2, headlineColor);

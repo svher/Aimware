@@ -74,7 +74,7 @@ bool Hack::WorldToScreen(Vec3 position, Vec2 &screen) {
     return true;
 }
 
-void Hack::Run() {
+void Hack::Run() const {
     float closetFOV = 10000;
     int localEntityId = GetLocalEntityId();
     Vec3 closetDeltaAngle{};
@@ -103,7 +103,7 @@ void Hack::Run() {
     }
 }
 
-void Hack::TraceRay() {
+void Hack::TraceRay() const {
     if (localEntity == nullptr) {
         return;
     }
@@ -151,16 +151,6 @@ void Hack::AimAt(Vec3 *target) {
 
 Vec3 *Hack::GetViewAngles() const {
     return (Vec3*)(*(uintptr_t*)(engine + dwClientState) + dwClientState_ViewAngles);
-}
-
-Vec3 Hack::TransformVec(Vec3 src, Vec3 angle, float distance) {
-    Vec3 newPos{};
-    // yaw
-    newPos.x = src.x + cosf(TO_RAD(angle.y)) * distance;
-    newPos.y = src.y + sinf(TO_RAD(angle.y)) * distance;
-    // pitch
-    newPos.z = src.z + tanf(TO_RAD(angle.x)) * distance;
-    return newPos;
 }
 
 int Hack::GetLocalEntityId() const {

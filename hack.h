@@ -87,9 +87,8 @@ public:
     bool WorldToScreen(Vec3 position, Vec2& screen);
     void AimAt(Vec3 *target);
     Vec3* GetViewAngles() const;
-    Vec3 TransformVec(Vec3 src, Vec3 dst, float distance);
     // aimbot
-    void Run();
+    void Run() const;
     void CheckButtons();
 
     struct Settings {
@@ -135,5 +134,5 @@ public:
         } enemy;
     } colors;
 
-    void TraceRay();
+    void TraceRay() const;
 };
