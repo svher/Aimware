@@ -7,7 +7,7 @@ static T* GetInterface(const char* name, HMODULE hModule) {
         return nullptr;
     }
     using CreateInterfaceFn = T*(*)(const char *pName, int *pReturnCode);
-    CreateInterfaceFn createInterface = reinterpret_cast<CreateInterfaceFn>(GetProcAddress(hModule, "CreateInterface"));
+    auto createInterface = reinterpret_cast<CreateInterfaceFn>(GetProcAddress(hModule, "CreateInterface"));
     return createInterface(name, nullptr);
 }
 

@@ -1,5 +1,4 @@
-﻿// dllmain.cpp : 定义 DLL 应用程序的入口点。
-#include "includes.h"
+﻿#include "includes.h"
 
 using CreateMoveFn = bool(__thiscall*)(void*, float, void*);
 
