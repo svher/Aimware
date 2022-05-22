@@ -6,6 +6,7 @@
 #include <d3dx9.h>
 #include <iostream>
 #include <cmath>
+#include <x86RetSpoof.h>
 
 const float PI = 3.14159265358;
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -16,6 +17,7 @@ const float PI = 3.14159265358;
 
 #include "csgo.h"
 #include "sdk.h"
+#include "memory.h"
 #include "dx.h"
 #include "vector.h"
 #include "drawing.h"

@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(MODULE_NAME cw)
 
 include_directories(. $ENV{DXSDK_DIR}Include)
+include_directories(public)
 
 link_directories("$ENV{DXSDK_DIR}/Lib/x86")
 add_library(${MODULE_NAME} SHARED "")
