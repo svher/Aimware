@@ -16,7 +16,10 @@ const float PI = 3.14159265358;
 #define ALIGN16 DECL_ALIGN(16)
 
 #include "csgo.h"
-#include "sdk.h"
+#include "sdk/enginetrace.h"
+#include "sdk/usercmd.h"
+#include "sdk/in_buttons.h"
+
 #include "memory.h"
 #include "dx.h"
 #include "vector.h"

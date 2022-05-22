@@ -32,6 +32,7 @@ public:
         DEFINE_MEMBER_N(Vec3, vecVelocity, m_vecVelocity);
         DEFINE_MEMBER_N(bool, bHasHelmet, m_bHasHelmet);
         DEFINE_MEMBER_N(uint32_t, bSpottedByMask, m_bSpottedByMask);
+        DEFINE_MEMBER_N(int, fFlags, m_fFlags);
     };
     Vec3* GetBonePos(int boneId) const;
 };
@@ -102,6 +103,7 @@ public:
         bool headline3D = false;
         bool velocityEsp = false;
         bool aimBot = false;
+        bool bHop = true;
     } settings;
 
     struct Buttons {

@@ -1,6 +1,6 @@
 ﻿#include "includes.h"
 
-using CreateMoveFn = bool(__thiscall*)(void*, float, void*);
+using CreateMoveFn = bool(__thiscall*)(void*, float, CUserCmd*);
 
 void* d3d9Device[119];
 Hack* hack;
@@ -13,10 +13,19 @@ BYTE CreateMoveByte[9] {0};
 void* gadget = NULL;
 
 void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice);
-bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, void* cmd) {
+bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, CUserCmd* cmd) {
     bool result = x86RetSpoof::invokeThiscall<bool>((std::uintptr_t)ecx, (std::uintptr_t)oCreateMove, (std::uintptr_t)gadget, frameTime, cmd);
     if (GetAsyncKeyState(VK_HOME) & 1) {
         hack->TraceRay();
+    }
+    if (!cmd || !cmd->command_number) {
+        return result;
+    }
+    if (hack->settings.bHop && hack->localEntity) {
+        // BE AWARE OF Pointer Arithmetic
+        if (!(hack->localEntity->fFlags & 1)) {
+            cmd->buttons &= ~IN_JUMP;
+        }
     }
     return result;
 }

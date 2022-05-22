@@ -6,6 +6,7 @@ set(MODULE_NAME cw)
 
 include_directories(. $ENV{DXSDK_DIR}Include)
 include_directories(public)
+include_directories(sdk)
 
 link_directories("$ENV{DXSDK_DIR}/Lib/x86")
 add_library(${MODULE_NAME} SHARED "")
