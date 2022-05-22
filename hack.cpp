@@ -1,14 +1,26 @@
 #include "includes.h"
 #include "hack.h"
 
-extern Hack* hack;
+template <typename T>
+static T* GetInterface(const char* name, HMODULE hModule) {
+    if (!hModule) {
+        return nullptr;
+    }
+    using CreateInterfaceFn = T*(*)(const char *pName, int *pReturnCode);
+    CreateInterfaceFn createInterface = reinterpret_cast<CreateInterfaceFn>(GetProcAddress(hModule, "CreateInterface"));
+    return createInterface(name, nullptr);
+}
 
 void Hack::Init() {
     client = (uintptr_t)GetModuleHandle("client.dll");
     engine = (uintptr_t)GetModuleHandle("engine.dll");
     entityList = (EntityList*)(client + dwEntityList);
-    createInterface = (CreateInterfaceFn)GetProcAddress((HMODULE)engine, "CreateInterface");
-    engineTrace = (IEngineTrace*)createInterface(INTERFACEVERSION_ENGINETRACE_CLIENT, NULL);
+    engineTrace = GetInterface<IEngineTrace>(INTERFACEVERSION_ENGINETRACE_CLIENT, (HMODULE)engine);
+    void *chlClient = GetInterface<void>("VClient018", (HMODULE)client);
+    // 5 bytes from the fifth vtable function entrance is global var g_pClientMode[MAX_SPLITSCREEN_PLAYERS]
+    void **g_pClientMode = *reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(chlClient))[10] + 5);
+    clientMode = g_pClientMode[0];
+
     stop = false;
 }
 
@@ -19,8 +31,8 @@ void Hack::Update() {
         crosshair2D.x = windowWidth / 2 - (windowWidth / 90 * localEntity->aimPunchAngle.y);
         crosshair2D.y = windowHeight / 2 + (windowHeight / 90 * localEntity->aimPunchAngle.x);
     } else {
-        hack->crosshair2D.x = windowWidth / 2;
-        hack->crosshair2D.y = windowHeight / 2;
+        crosshair2D.x = windowWidth / 2;
+        crosshair2D.y = windowHeight / 2;
     }
 }
 
@@ -138,7 +150,7 @@ void Hack::AimAt(Vec3 *target) {
 }
 
 Vec3 *Hack::GetViewAngles() const {
-    return (Vec3*)(*(uintptr_t*)(hack->engine + dwClientState) + dwClientState_ViewAngles);
+    return (Vec3*)(*(uintptr_t*)(engine + dwClientState) + dwClientState_ViewAngles);
 }
 
 Vec3 Hack::TransformVec(Vec3 src, Vec3 angle, float distance) {

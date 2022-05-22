@@ -51,6 +51,7 @@ class Hack {
 public:
     uintptr_t engine;
     uintptr_t client;
+    void* clientMode;
 
     Entity* localEntity;
     EntityList* entityList;
@@ -64,7 +65,6 @@ public:
 
     bool stop = false;
 
-    CreateInterfaceFn createInterface;
     IEngineTrace *engineTrace;
 
     ~Hack() {

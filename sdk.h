@@ -2,9 +2,6 @@
 #include "vector.h"
 
 class Entity;
-// interface.h
-typedef void* (*CreateInterfaceFn)(const char *pName, int *pReturnCode);
-
 // use new EngineTraceClient
 #define INTERFACEVERSION_ENGINETRACE_CLIENT	"EngineTraceClient004"
 #define	CONTENTS_SOLID			0x1		// an eye is never valid in a solid

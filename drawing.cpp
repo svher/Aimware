@@ -1,8 +1,8 @@
 #include "includes.h"
 #include "drawing.h"
 
-
 extern Hack* hack;
+extern LPDIRECT3DDEVICE9 pDevice;
 
 void DrawFilledRect(int x, int y, int w, int h, D3DCOLOR color) {
     D3DRECT rect = {x, y, x + w, y + h};

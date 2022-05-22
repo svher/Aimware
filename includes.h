@@ -6,6 +6,7 @@
 #include <d3dx9.h>
 #include <iostream>
 #include <cmath>
+#include "MinHook.h"
 
 const float PI = 3.14159265358;
 #define ABS(x) ((x) < 0 ? -(x) : (x))
