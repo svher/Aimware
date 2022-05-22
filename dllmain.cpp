@@ -9,6 +9,7 @@ Hack* hack;
 EndSceneFn oEndScene = nullptr;
 CreateMoveFn oCreateMove = nullptr;
 BYTE EndSceneByte[7]{ 0 };
+BYTE CreateMoveByte[9] {0};
 
 void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice);
 bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, void* cmd) {
@@ -35,9 +36,12 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     hack = new Hack();
     hack->Init();
 
-    MH_Initialize();
-    MH_CreateHook((*static_cast<void***>(hack->clientMode))[24], (LPVOID)hkCreateMove, (LPVOID*)&oCreateMove);
-    MH_EnableHook(MH_ALL_HOOKS);
+    BYTE* createMovePtr = (*static_cast<BYTE***>(hack->clientMode))[24];
+    memcpy(CreateMoveByte, createMovePtr, 9);
+    // cannot be len of 7
+    // +06 | FF 8B 0E E8 72 DB dec dword [ebx-0x248D17F2]
+    // TODO: Bypass Valve return address check, otherwise you won't be able to join a team
+    oCreateMove = (CreateMoveFn) TrampHook(createMovePtr, (BYTE*)hkCreateMove, 9);
 
     while(!GetAsyncKeyState(VK_END)) {
         hack->Update();
@@ -48,9 +52,7 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     }
 
     Patch((BYTE*)d3d9Device[42], EndSceneByte, 7);
-    MH_DisableHook(MH_ALL_HOOKS);
-    MH_RemoveHook(MH_ALL_HOOKS);
-    MH_Uninitialize();
+    Patch(createMovePtr, CreateMoveByte, 9);
 
     FreeLibraryAndExitThread(hModule, 0);
 }
