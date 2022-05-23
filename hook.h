@@ -1,5 +1,5 @@
 #pragma once
-#include "includes.h"
+#include <Windows.h>
 
 void Patch(BYTE* dst, BYTE* src, unsigned int size);
 bool Hook(void* src, void* dst, int len);

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "includes.h"
-#include "csgo.h"
 #include <cstdint>
+#include <d3dx9.h>
+#include "csgo.h"
 
 #define STR_MERGE_IMPL(a, b) a##b
 #define STR_MERGE(a, b) STR_MERGE_IMPL(a, b)
@@ -47,6 +47,9 @@ class EntityList {
 public:
     EntityListObject entities[32];
 };
+
+template <typename T>
+static T* GetInterface(const char* name, HMODULE hModule);
 
 class Hack {
 public:

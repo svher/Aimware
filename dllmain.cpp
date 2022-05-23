@@ -1,4 +1,6 @@
 ﻿#include "includes.h"
+#include "x86RetSpoof.h"
+#include <iostream>
 
 using CreateMoveFn = bool(__thiscall*)(void*, float, CUserCmd*);
 
@@ -22,8 +24,10 @@ bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, CUserCmd* cm
         return result;
     }
     if (hack->settings.bHop && hack->localEntity) {
-        // BE AWARE OF Pointer Arithmetic
-        if (!(hack->localEntity->fFlags & 1)) {
+        /* BE AWARE OF Pointer Arithmetic
+         *
+         * If the player is not on ground, don't press the jump key */
+        if (!(hack->localEntity->fFlags & FL_ONGROUND)) {
             cmd->buttons &= ~IN_JUMP;
         }
     }
@@ -92,6 +96,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+        DisableThreadLibraryCalls(hModule);
         handle = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)DllAttach, hModule, 0, nullptr);
         if (handle != nullptr) {
             CloseHandle(handle);

@@ -1,5 +1,6 @@
 #pragma once
-#include "includes.h"
+#include <d3d9.h>
+#include <Windows.h>
 
 using EndSceneFn = HRESULT(APIENTRY*)(LPDIRECT3DDEVICE9 pDevice);
 

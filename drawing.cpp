@@ -1,5 +1,4 @@
 #include "includes.h"
-#include "drawing.h"
 
 extern Hack* hack;
 extern LPDIRECT3DDEVICE9 pDevice;

@@ -1,5 +1,5 @@
 #include "includes.h"
-#include "hack.h"
+#include <iostream>
 
 template <typename T>
 static T* GetInterface(const char* name, HMODULE hModule) {
