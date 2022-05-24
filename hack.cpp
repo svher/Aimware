@@ -18,6 +18,7 @@ void Hack::Init() {
     engineTrace = GetInterface<IEngineTrace>(INTERFACEVERSION_ENGINETRACE_CLIENT, (HMODULE)engine);
     void *chlClient = GetInterface<void>("VClient018", (HMODULE)client);
     // 5 bytes from the fifth vtable function entrance is global var g_pClientMode[MAX_SPLITSCREEN_PLAYERS]
+    // CHLClient - << HudProcessInput >>
     void **g_pClientMode = *reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(chlClient))[10] + 5);
     clientMode = g_pClientMode[0];
 

@@ -13,6 +13,8 @@ inline constexpr float PI = 3.14159265358;
 #include "sdk/usercmd.h"
 #include "sdk/in_buttons.h"
 #include "sdk/consts.h"
+#include "sdk/client_class.h"
+#include "sdk/cliententitylist.h"
 
 #include "drawing.h"
 #include "memory.h"

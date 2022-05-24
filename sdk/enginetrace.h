@@ -134,11 +134,12 @@ public:
 };
 
 class IEngineTrace {
-    virtual void fn0() = 0;
-    virtual void fn1() = 0;
-    virtual void fn2() = 0;
-    virtual void fn3() = 0;
-    virtual void fn4() = 0;
+private:
+    virtual void _unused0() = 0;
+    virtual void _unused1() = 0;
+    virtual void _unused2() = 0;
+    virtual void _unused3() = 0;
+    virtual void _unused4() = 0;
 public:
     virtual void TraceRay( const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace ) = 0;
 };
