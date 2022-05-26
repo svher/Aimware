@@ -1,4 +1,5 @@
 #include "includes.h"
+#include "x86RetSpoof.h"
 #include <iostream>
 
 template <typename T>
@@ -16,12 +17,18 @@ void Hack::Init() {
     engine = (uintptr_t)GetModuleHandle("engine.dll");
     entityList = (EntityList*)(client + dwEntityList);
     engineTrace = GetInterface<IEngineTrace>(INTERFACEVERSION_ENGINETRACE_CLIENT, (HMODULE)engine);
-    void *chlClient = GetInterface<void>("VClient018", (HMODULE)client);
+    clientEntityList = GetInterface<IClientEntityList>("VClientEntityList003", (HMODULE)client);
+    chlClient = GetInterface<CHLClient>("VClient018", (HMODULE)client);
     // 5 bytes from the fifth vtable function entrance is global var g_pClientMode[MAX_SPLITSCREEN_PLAYERS]
     // CHLClient - << HudProcessInput >>
     void **g_pClientMode = *reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(chlClient))[10] + 5);
     clientMode = g_pClientMode[0];
-
+    SetupNetvars();
+    // search FF 23 in execution page
+    // aka: jmp dword ptr [ebx]
+    gadget = Memory::PatternScan((HMODULE)client, "FF 23 F8 F6 87 B1 03 00 00 02");
+    std::cout << "Client gadget is: 0x" << std::hex << gadget << std::endl;
+    // start the loop
     stop = false;
 }
 
@@ -75,20 +82,23 @@ bool Hack::WorldToScreen(Vec3 position, Vec2 &screen) {
     return true;
 }
 
-void Hack::Run() const {
+void Hack::Run(CUserCmd *cmd) const {
     float closetFOV = 10000;
-    int localEntityId = GetLocalEntityId();
     Vec3 closetDeltaAngle{};
-    Vec3 *viewAngle = GetViewAngles();
+    Vec3 *viewAngle = &cmd->viewangles;
     for (int i = 1; i < 32; i++) {
         Entity* entity = entityList->entities[i].entity;
+        // Entity* entity = clientEntityList->GetClientEntity(i+1);
         if (!CheckValidEntity(entity)) {
             continue;
         }
         if (entity->iTeamNum == localEntity->iTeamNum) {
             continue;
         }
-        if (!(entity->bSpottedByMask & (1 << localEntityId))) {
+        entity->bSpotted = true;
+        // slow but work in non-game thread
+        // if (!(entity->bSpottedByMask & (1 << localEntityId))) {
+        if (!TraceRay(entity)) {
             continue;
         }
         Vec3 localViewPos = localEntity->vecViewOffset + localEntity->vecOrigin;
@@ -99,30 +109,25 @@ void Hack::Run() const {
     }
     if (!closetDeltaAngle.isZero()) {
         Vec3 newAngle = closetDeltaAngle + *viewAngle;
-        viewAngle->x = newAngle.x;
-        viewAngle->y = newAngle.y;
+        if (newAngle.x >= -89 && newAngle.x <= 89 && newAngle.y >= -180 && newAngle.y <= 180) {
+            // why set dwClientState_ViewAngles not work in CreateMove?
+            viewAngle->x = newAngle.x;
+            viewAngle->y = newAngle.y;
+        }
     }
 }
 
-void Hack::TraceRay() const {
-    if (localEntity == nullptr) {
-        return;
+bool Hack::TraceRay(Entity* target) const {
+    CGameTrace trace{};
+    Ray_t ray{};
+    CTraceFilter traceFilter;
+    traceFilter.pSkip = localEntity;
+    ray.Init(localEntity->vecOrigin + localEntity->vecViewOffset, *target->GetBonePos(8));
+    engineTrace->TraceRay(ray, MASK_SHOT | CONTENTS_GRATE, &traceFilter, &trace);
+    if (target == trace.m_pEnt) {
+        return true;
     }
-    for (int i = 1; i < 32; i++) {
-        Entity* entity = entityList->entities[i].entity;
-        if (!CheckValidEntity(entity)) {
-            continue;
-        }
-        CGameTrace trace{};
-        Ray_t ray{};
-        CTraceFilter traceFilter;
-        traceFilter.pSkip = localEntity;
-        ray.Init(localEntity->vecOrigin + localEntity->vecViewOffset, *entity->GetBonePos(8));
-        engineTrace->TraceRay(ray, MASK_SHOT | CONTENTS_GRATE, &traceFilter, &trace);
-        if (entity == trace.m_pEnt) {
-            std::cout << "Ent 0x" << std::hex << entity << std::endl;
-        }
-    }
+    return false;
 }
 
 Vec3 * Entity::GetBonePos(int boneId) const {
@@ -131,23 +136,6 @@ Vec3 * Entity::GetBonePos(int boneId) const {
     bonePos.y = *(float*)(dwBoneMatrix + 0x30 * boneId + 0x1C);
     bonePos.z = *(float*)(dwBoneMatrix + 0x30 * boneId + 0x2C);
     return &bonePos;
-}
-
-void Hack::AimAt(Vec3 *target) {
-    Vec3 myPos = Vec3(localEntity->vecOrigin.x + localEntity->vecViewOffset.x,
-                         localEntity->vecOrigin.y + localEntity->vecViewOffset.y,
-                         localEntity->vecOrigin.z + localEntity->vecViewOffset.z);
-    Vec3 deltaVec = *target - myPos;
-    float deltaVecLength = deltaVec.Norm2D();
-    auto pitch = -asinf(deltaVec.z / deltaVecLength) * (180 / PI);
-    auto yaw = atan2f(deltaVec.y, deltaVec.x) * (180 / PI);
-
-    Vec3* viewAngles = GetViewAngles();
-
-    if (pitch >= -89 && pitch <= 89 && yaw >= -180 && yaw <= 180) {
-        viewAngles->x = pitch;
-        viewAngles->y = yaw;
-    }
 }
 
 Vec3 *Hack::GetViewAngles() const {

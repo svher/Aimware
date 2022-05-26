@@ -22,10 +22,13 @@ public:
 
     ID3DXLine* LineL;
     ID3DXFont* FontF;
+    void* gadget = NULL;
 
     bool stop = false;
 
     IEngineTrace *engineTrace;
+    IClientEntityList* clientEntityList = nullptr;
+    CHLClient* chlClient = nullptr;
 
     ~Hack() {
         stop = true;
@@ -45,10 +48,9 @@ public:
     bool CheckValidEntity(Entity* entity) const;
     int GetLocalEntityId() const;
     bool WorldToScreen(Vec3 position, Vec2& screen);
-    void AimAt(Vec3 *target);
     Vec3* GetViewAngles() const;
     // aimbot
-    void Run() const;
+    void Run(CUserCmd *cmd) const;
     void CheckButtons();
 
     struct Settings {
@@ -95,5 +97,5 @@ public:
         } enemy;
     } colors;
 
-    void TraceRay() const;
+    bool TraceRay(Entity *target) const;
 };

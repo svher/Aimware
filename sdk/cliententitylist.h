@@ -6,7 +6,7 @@ private:
     virtual void _unused1() = 0;
     virtual void _unused2() = 0;
 public:
-    virtual void* GetClientEntity(int index) = 0;
+    virtual Entity* GetClientEntity(int index) = 0;
 };
 
 class ClientClass;

@@ -2,6 +2,7 @@
 
 #include "csgo.h"
 #include "vector.h"
+#include <string>
 
 #define STR_MERGE_IMPL(a, b) a##b
 #define STR_MERGE(a, b) STR_MERGE_IMPL(a, b)
@@ -32,7 +33,9 @@ public:
         DEFINE_MEMBER_N(bool, bHasHelmet, m_bHasHelmet);
         DEFINE_MEMBER_N(uint32_t, bSpottedByMask, m_bSpottedByMask);
         DEFINE_MEMBER_N(int, fFlags, m_fFlags);
+        DEFINE_MEMBER_N(bool, bSpotted, m_bSpotted);
     };
+    NETVAR(_bSpotted, "CBaseEntity->m_bSpotted", bool)
     Vec3* GetBonePos(int boneId) const;
 };
 

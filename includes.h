@@ -16,6 +16,8 @@ inline constexpr float PI = 3.14159265358;
 #include "sdk/client_class.h"
 #include "sdk/cliententitylist.h"
 
+#include "netvar.h"
+#include "hash.h"
 #include "drawing.h"
 #include "memory.h"
 #include "dx.h"

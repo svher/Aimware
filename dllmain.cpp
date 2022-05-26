@@ -12,16 +12,14 @@ CreateMoveFn oCreateMove = nullptr;
 BYTE EndSceneByte[7]{ 0 };
 BYTE CreateMoveByte[9] {0};
 
-void* gadget = NULL;
-
 void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice);
 bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, CUserCmd* cmd) {
-    bool result = x86RetSpoof::invokeThiscall<bool>((std::uintptr_t)ecx, (std::uintptr_t)oCreateMove, (std::uintptr_t)gadget, frameTime, cmd);
-    if (GetAsyncKeyState(VK_HOME) & 1) {
-        hack->TraceRay();
-    }
+    bool result = x86RetSpoof::invokeThiscall<bool>((std::uintptr_t)ecx, (std::uintptr_t)oCreateMove, (std::uintptr_t)hack->gadget, frameTime, cmd);
     if (!cmd || !cmd->command_number) {
         return result;
+    }
+    if (hack->settings.aimBot) {
+        hack->Run(cmd);
     }
     if (hack->settings.bHop && hack->localEntity) {
         /* BE AWARE OF Pointer Arithmetic
@@ -50,10 +48,6 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     hack = new Hack();
     hack->Init();
 
-    // search FF 23 in execution page
-    // aka: jmp dword ptr [ebx]
-    gadget = Memory::PatternScan((HMODULE)hack->client, "FF 23 F8 F6 87 B1 03 00 00 02");
-    std::cout << "Client gadget is: 0x" << std::hex << gadget << std::endl;
 
     BYTE* createMovePtr = (*static_cast<BYTE***>(hack->clientMode))[24];
     memcpy(CreateMoveByte, createMovePtr, 9);
@@ -67,9 +61,6 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     while(!GetAsyncKeyState(VK_END)) {
         hack->Update();
         hack->CheckButtons();
-        if (hack->settings.aimBot) {
-            hack->Run();
-        }
     }
 
     Patch((BYTE*)d3d9Device[42], EndSceneByte, 7);

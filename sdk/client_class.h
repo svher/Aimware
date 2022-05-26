@@ -27,7 +27,7 @@ public:
     int						m_StringBufferSize;
 
 
-private:
+// private:
 
     bool					m_bInsideArray;		// Set to true by the engine if this property sits inside an array.
 
