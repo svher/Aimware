@@ -84,6 +84,8 @@ bool Hack::WorldToScreen(Vec3 position, Vec2 &screen) {
 
 void Hack::Run(CUserCmd *cmd) const {
     float closetFOV = 10000;
+    // DON'T USE GetViewAngles() HERE
+    // if CreateMove returns true, then viewangles will be overridden by cmd->viewangles
     Vec3 closetDeltaAngle{};
     Vec3 *viewAngle = &cmd->viewangles;
     for (int i = 1; i < 32; i++) {
