@@ -19,6 +19,7 @@ inline constexpr float PI = 3.14159265358;
 #include "netvar.h"
 #include "hash.h"
 #include "drawing.h"
+#include "gui.h"
 #include "memory.h"
 #include "dx.h"
 #include "vector.h"

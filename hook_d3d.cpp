@@ -1,17 +1,39 @@
 #include "includes.h"
+#include "backends/imgui_impl_dx9.h"
+#include "intrin.h"
 #include <sstream>
 
 extern EndSceneFn oEndScene;
+extern ResetFn oReset;
 extern Hack *hack;
 LPDIRECT3DDEVICE9 pDevice;
 
-void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
+HRESULT APIENTRY hkReset(LPDIRECT3DDEVICE9 o_pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters) {
+    if (hack->stop) {
+        return oReset(o_pDevice, pPresentationParameters);
+    }
+    ImGui_ImplDX9_InvalidateDeviceObjects();
+    auto result = oReset(o_pDevice, pPresentationParameters);
+    ImGui_ImplDX9_CreateDeviceObjects();
+    return result;
+}
+
+HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
     if (!pDevice) {
         pDevice = o_pDevice;
     }
     if (hack->stop) {
-        oEndScene(o_pDevice);
-        return;
+        return oEndScene(o_pDevice);
+    }
+
+    static const auto returnAddress = _ReturnAddress();
+    if (_ReturnAddress() == returnAddress) {
+        if (!gui::setup) {
+            gui::SetupMenu(o_pDevice);
+        }
+        if (gui::open) {
+            gui::Render();
+        }
     }
 
     DrawTextWrapper("ESP HACK SUPER LEGIT", windowWidth / 2, windowHeight - 20, D3DCOLOR_ARGB(255, 255, 255, 255));
@@ -145,5 +167,5 @@ void APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
         }
     }
 
-    oEndScene(pDevice);
+    return oEndScene(o_pDevice);
 }

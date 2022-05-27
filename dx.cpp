@@ -31,9 +31,15 @@ bool GetD3D9Device(void **pTable, size_t size) {
         return false;
     }
 
-    IDirect3D9 *pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+    /* Instead of linking the library, you also can get that function from d3dx9.dll
+     *
+     * using Direct3DCreate9Fn = IDirect3D9 * (WINAPI *)(UINT SDKVersion);
+     * const auto _Direct3DCreate9 = reinterpret_cast<Direct3DCreate9Fn>(GetProcAddress(GetModuleHandle(TEXT("d3d9.dll")), "Direct3DCreate9"));
+     *
+     */
+    LPDIRECT3D9 pD3D = Direct3DCreate9(D3D_SDK_VERSION);
 
-    IDirect3DDevice9* pDummyDevice = nullptr;
+    LPDIRECT3DDEVICE9 pDummyDevice = nullptr;
 
     D3DPRESENT_PARAMETERS d3dParams = {};
     d3dParams.Windowed = false;

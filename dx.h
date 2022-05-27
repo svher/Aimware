@@ -3,6 +3,7 @@
 #include <Windows.h>
 
 using EndSceneFn = HRESULT(APIENTRY*)(LPDIRECT3DDEVICE9 pDevice);
+using ResetFn = HRESULT(APIENTRY*)(LPDIRECT3DDEVICE9 pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
 
 static HWND window;
 
