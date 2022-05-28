@@ -10,6 +10,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+extern Hack *hack;
+
 void gui::SetupMenu(LPDIRECT3DDEVICE9 pDevice) noexcept {
     auto params = D3DDEVICE_CREATION_PARAMETERS {};
     pDevice->GetCreationParameters(&params);
@@ -51,6 +53,7 @@ void gui::Render() noexcept {
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (GetAsyncKeyState(VK_HOME) & 1) {
         gui::open = !gui::open;
+        hack->objs.InputSystem->EnableInput(!gui::open);
     }
 
     if (gui::open) {

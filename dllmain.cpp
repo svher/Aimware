@@ -57,6 +57,10 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     SetConsoleTitleA("MyAimbot - DEBUG");
 #endif
 
+    hack = new Hack();
+    hack->Init();
+    hack->objs.InputSystem->EnableInput(false);
+
     if (GetD3D9Device(d3d9Device, sizeof(d3d9Device))) {
         memcpy(EndSceneByte, d3d9Device[42], 7);
         oEndScene = (EndSceneFn)TrampHook((BYTE*)d3d9Device[42], (BYTE*)hkEndScene, 7);
@@ -65,8 +69,10 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
         oReset = (ResetFn)TrampHook((BYTE*)d3d9Device[16], (BYTE*)hkReset, 5);
     }
 
-    hack = new Hack();
-    hack->Init();
+#ifdef _DEBUG
+    hack->objs.EngineClient->ClientCmd("sv_lan 1");
+#endif
+    hack->objs.InputSystem->EnableInput(!gui::open);
 
     BYTE* createMovePtr = GetVFunc<BYTE*>(hack->objs.ClientModeShared, 24);
     memcpy(CreateMoveByte, createMovePtr, 9);
@@ -101,6 +107,8 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     Patch(lockCursorPtr, LockCursorByte, 7);
 
     gui::Destroy();
+
+    hack->objs.InputSystem->EnableInput(true);
 
     FreeLibraryAndExitThread(hModule, 0);
 }

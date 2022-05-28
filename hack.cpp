@@ -10,7 +10,9 @@ void Hack::Init() {
     objs.EngineTrace = GetInterface<IEngineTrace>(INTERFACEVERSION_ENGINETRACE_CLIENT, (HMODULE)engine);
     objs.ClientEntityList = GetInterface<IClientEntityList>("VClientEntityList003", (HMODULE)client);
     objs.ChlClient = GetInterface<CHLClient>("VClient018", (HMODULE)client);
+    objs.EngineClient = GetInterface<IVEngineClient>("VEngineClient014", (HMODULE)engine);
     objs.MatSystemSurface = GetInterface<void>("VGUI_Surface031", GetModuleHandle("vguimatsurface.dll"));
+    objs.InputSystem = GetInterface<IInputSystem>("InputSystemVersion001", GetModuleHandle("inputsystem.dll"));
     // 5 bytes from the fifth vtable function entrance is global var g_pClientMode[MAX_SPLITSCREEN_PLAYERS]
     // CHLClient - << HudProcessInput >>
     void **g_pClientMode = *reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(objs.ChlClient))[10] + 5);

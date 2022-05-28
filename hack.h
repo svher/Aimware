@@ -26,9 +26,11 @@ public:
     bool stop = false;
 
     struct {
-        IEngineTrace *EngineTrace;
+        IEngineTrace *EngineTrace = nullptr;
         IClientEntityList* ClientEntityList = nullptr;
         CHLClient* ChlClient = nullptr;
+        IVEngineClient* EngineClient = nullptr;
+        IInputSystem* InputSystem = nullptr;
         void* MatSystemSurface = nullptr;
         void* ClientModeShared = nullptr;
     } objs;
