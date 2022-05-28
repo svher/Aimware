@@ -31,9 +31,7 @@ HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
         if (!gui::setup) {
             gui::SetupMenu(o_pDevice);
         }
-        if (gui::open) {
-            gui::Render();
-        }
+        gui::Render();
     }
 
     DrawTextWrapper("ESP HACK SUPER LEGIT", windowWidth / 2, windowHeight - 20, D3DCOLOR_ARGB(255, 255, 255, 255));

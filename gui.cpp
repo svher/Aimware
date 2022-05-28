@@ -43,7 +43,17 @@ void gui::Render() noexcept {
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::ShowDemoWindow(&open);
+    if (open) {
+        ImGui::ShowDemoWindow(&open);
+    }
+
+    if (ImGui::Begin("TEST")) {
+        ImGui::Text("ABOUT THIS DEMO:");
+        ImGui::BulletText("Sections below are demonstrating many aspects of the library.");
+        ImGui::BulletText("The \"Examples\" menu above leads to more demo contents.");
+        ImGui::BulletText("The \"Tools\" menu above gives access to: About Box, Style Editor,\n");
+        ImGui::End();
+    }
 
     ImGui::EndFrame();
     ImGui::Render();
@@ -53,12 +63,12 @@ void gui::Render() noexcept {
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (GetAsyncKeyState(VK_HOME) & 1) {
         gui::open = !gui::open;
-        hack->objs.InputSystem->EnableInput(!gui::open);
     }
 
     if (gui::open) {
         ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam);
     }
+    hack->objs.InputSystem->EnableInput(!gui::open);
 
     return CallWindowProc(gui::oWindowProc, hwnd, uMsg, wParam, lParam);
 }

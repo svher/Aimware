@@ -59,7 +59,6 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
 
     hack = new Hack();
     hack->Init();
-    hack->objs.InputSystem->EnableInput(false);
 
     if (GetD3D9Device(d3d9Device, sizeof(d3d9Device))) {
         memcpy(EndSceneByte, d3d9Device[42], 7);
