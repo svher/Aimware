@@ -14,9 +14,10 @@ bool Hook(BYTE *src, const BYTE *dst, unsigned int len) {
     }
     DWORD oldProtect;
     VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &oldProtect);
-    // E9: JMP rel16
-    memset(src, 0xFF, len);
+    // Fill memory with NOP
+    memset(src, 0x90, len);
     auto relAddy = (uintptr_t)(dst - src - 5);
+    // E9: JMP rel16
     *src = (BYTE)0xE9;
     *(uintptr_t*)(src +  1) = (uintptr_t)relAddy;
     VirtualProtect(src, len, oldProtect, nullptr);

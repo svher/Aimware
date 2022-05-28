@@ -2,32 +2,26 @@
 #include "x86RetSpoof.h"
 #include <iostream>
 
-template <typename T>
-static T* GetInterface(const char* name, HMODULE hModule) {
-    if (!hModule) {
-        return nullptr;
-    }
-    using CreateInterfaceFn = T*(*)(const char *pName, int *pReturnCode);
-    auto createInterface = reinterpret_cast<CreateInterfaceFn>(GetProcAddress(hModule, "CreateInterface"));
-    return createInterface(name, nullptr);
-}
-
 void Hack::Init() {
     client = (uintptr_t)GetModuleHandle("client.dll");
     engine = (uintptr_t)GetModuleHandle("engine.dll");
     entityList = (EntityList*)(client + dwEntityList);
-    engineTrace = GetInterface<IEngineTrace>(INTERFACEVERSION_ENGINETRACE_CLIENT, (HMODULE)engine);
-    clientEntityList = GetInterface<IClientEntityList>("VClientEntityList003", (HMODULE)client);
-    chlClient = GetInterface<CHLClient>("VClient018", (HMODULE)client);
+    // Interfaces
+    objs.EngineTrace = GetInterface<IEngineTrace>(INTERFACEVERSION_ENGINETRACE_CLIENT, (HMODULE)engine);
+    objs.ClientEntityList = GetInterface<IClientEntityList>("VClientEntityList003", (HMODULE)client);
+    objs.ChlClient = GetInterface<CHLClient>("VClient018", (HMODULE)client);
+    objs.MatSystemSurface = GetInterface<void>("VGUI_Surface031", GetModuleHandle("vguimatsurface.dll"));
     // 5 bytes from the fifth vtable function entrance is global var g_pClientMode[MAX_SPLITSCREEN_PLAYERS]
     // CHLClient - << HudProcessInput >>
-    void **g_pClientMode = *reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(chlClient))[10] + 5);
-    clientMode = g_pClientMode[0];
+    void **g_pClientMode = *reinterpret_cast<void***>((*reinterpret_cast<uintptr_t**>(objs.ChlClient))[10] + 5);
+    objs.ClientModeShared = g_pClientMode[0];
     SetupNetvars();
     // search FF 23 in execution page
     // aka: jmp dword ptr [ebx]
-    gadget = Memory::PatternScan((HMODULE)client, "FF 23 F8 F6 87 B1 03 00 00 02");
-    std::cout << "Client gadget is: 0x" << std::hex << gadget << std::endl;
+    clientGadget = Memory::PatternScan((HMODULE)client, "FF 23 F8 F6 87 B1 03 00 00 02");
+#ifdef _DEBUG
+    std::cout << "Client clientGadget is: 0x" << std::hex << clientGadget << std::endl;
+#endif
     // start the loop
     stop = false;
 }
@@ -125,7 +119,7 @@ bool Hack::TraceRay(Entity* target) const {
     CTraceFilter traceFilter;
     traceFilter.pSkip = localEntity;
     ray.Init(localEntity->vecOrigin + localEntity->vecViewOffset, *target->GetBonePos(8));
-    engineTrace->TraceRay(ray, MASK_SHOT | CONTENTS_GRATE, &traceFilter, &trace);
+    objs.EngineTrace->TraceRay(ray, MASK_SHOT | CONTENTS_GRATE, &traceFilter, &trace);
     if (target == trace.m_pEnt) {
         return true;
     }

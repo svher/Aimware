@@ -5,7 +5,7 @@
 extern Hack *hack;
 
 void SetupNetvars() {
-    for (auto clientClass = hack->chlClient->GetAllClasses(); clientClass; clientClass = clientClass->m_pNext) {
+    for (auto clientClass = hack->objs.ChlClient->GetAllClasses(); clientClass; clientClass = clientClass->m_pNext) {
         if (clientClass->m_pRecvTable) {
             Dump(clientClass->m_pNetworkName, clientClass->m_pRecvTable);
         }

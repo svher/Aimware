@@ -3,6 +3,7 @@
 #include "thirdparty/x86RetSpoof.h"
 
 using CreateMoveFn = bool(__thiscall*)(void*, float, CUserCmd*);
+using LockCursorFn = void(__thiscall*)(void*);
 
 void* d3d9Device[119];
 Hack* hack;
@@ -10,16 +11,18 @@ Hack* hack;
 EndSceneFn oEndScene = nullptr;
 ResetFn oReset = nullptr;
 CreateMoveFn oCreateMove = nullptr;
+LockCursorFn oLockCursor = nullptr;
 BYTE EndSceneByte[7]{ 0 };
 BYTE CreateMoveByte[9] {0};
 BYTE ResetByte[5] {0};
+BYTE LockCursorByte[7] {0};
 
 // D3D Hook Signature
 HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice);
 HRESULT APIENTRY hkReset(LPDIRECT3DDEVICE9 o_pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
 
 bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, CUserCmd* cmd) {
-    bool result = x86RetSpoof::invokeThiscall<bool>((std::uintptr_t)ecx, (std::uintptr_t)oCreateMove, (std::uintptr_t)hack->gadget, frameTime, cmd);
+    bool result = x86RetSpoof::invokeThiscall<bool>((std::uintptr_t)ecx, (std::uintptr_t)oCreateMove, (std::uintptr_t)hack->clientGadget, frameTime, cmd);
     if (!cmd || !cmd->command_number) {
         return result;
     }
@@ -37,6 +40,15 @@ bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, CUserCmd* cm
     return result;
 }
 
+void __fastcall hkLockCursor(void *ecx, void *edx) {
+    if (!gui::open) {
+        oLockCursor(ecx);
+        return;
+    }
+    // Call UnlockCursor
+    InvokeVFuncThisCall<66>(ecx);
+}
+
 DWORD WINAPI DllAttach(HMODULE hModule) {
 #ifdef _DEBUG
     AllocConsole();
@@ -46,8 +58,6 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
 #endif
 
     if (GetD3D9Device(d3d9Device, sizeof(d3d9Device))) {
-        std::cout << "EndScene: 0x" << std::hex << d3d9Device[42] << std::endl;
-        std::cout << "Reset: 0x" << std::hex << d3d9Device[16] << std::endl;
         memcpy(EndSceneByte, d3d9Device[42], 7);
         oEndScene = (EndSceneFn)TrampHook((BYTE*)d3d9Device[42], (BYTE*)hkEndScene, 7);
 
@@ -58,8 +68,7 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     hack = new Hack();
     hack->Init();
 
-    BYTE* createMovePtr = (*static_cast<BYTE***>(hack->clientMode))[24];
-    std::cout << "CreateMove: 0x" << std::hex << (void*)createMovePtr << std::endl;
+    BYTE* createMovePtr = GetVFunc<BYTE*>(hack->objs.ClientModeShared, 24);
     memcpy(CreateMoveByte, createMovePtr, 9);
     /* cannot be len of 7
     * +06 | FF 8B 0E E8 72 DB dec dword [ebx-0x248D17F2]
@@ -68,14 +77,28 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     */
     oCreateMove = (CreateMoveFn) TrampHook(createMovePtr, (BYTE*)hkCreateMove, 9);
 
+    // ISurface -> IAppSystem
+    // BYTE *lockCursorPtr = nullptr;
+    BYTE *lockCursorPtr = GetVFunc<BYTE*>(hack->objs.MatSystemSurface, 67);
+    memcpy(LockCursorByte, lockCursorPtr, 7);
+    oLockCursor = (LockCursorFn) TrampHook(lockCursorPtr, (BYTE*) hkLockCursor, 7);
+
+#ifdef _DEBUG
+    std::cout << "EndScene: 0x" << std::hex << d3d9Device[42] << std::endl;
+    std::cout << "Reset: 0x" << std::hex << d3d9Device[16] << std::endl;
+    std::cout << "CreateMove: 0x" << std::hex << (void*)createMovePtr << std::endl;
+    std::cout << "LockCursor: 0x" << std::hex << (void*)lockCursorPtr << std::endl;
+#endif
+
     while(!GetAsyncKeyState(VK_END)) {
         hack->Update();
         hack->CheckButtons();
     }
 
+    Patch((BYTE*)d3d9Device[16], ResetByte, 5);
     Patch((BYTE*)d3d9Device[42], EndSceneByte, 7);
     Patch(createMovePtr, CreateMoveByte, 9);
-    Patch((BYTE*)d3d9Device[16], ResetByte, 5);
+    Patch(lockCursorPtr, LockCursorByte, 7);
 
     gui::Destroy();
 

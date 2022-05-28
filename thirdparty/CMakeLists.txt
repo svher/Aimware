@@ -1,5 +1,3 @@
-aux_source_directory(imgui DIR_SRC)
-
 target_sources(${MODULE_NAME} PRIVATE
         imgui/imgui.cpp
         imgui/imgui_tables.cpp

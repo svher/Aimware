@@ -4,14 +4,10 @@
 #include <d3dx9.h>
 #include "entity.h"
 
-template <typename T>
-static T* GetInterface(const char* name, HMODULE hModule);
-
 class Hack {
 public:
     uintptr_t engine;
     uintptr_t client;
-    void* clientMode;
 
     Entity* localEntity;
     EntityList* entityList;
@@ -20,15 +16,22 @@ public:
     Vec2 crosshair2D;
     int crosshairSize = 4;
 
+    // Direct2D variables
     ID3DXLine* LineL;
     ID3DXFont* FontF;
-    void* gadget = NULL;
+
+    // Gadget for return address spoof
+    void* clientGadget = NULL;
 
     bool stop = false;
 
-    IEngineTrace *engineTrace;
-    IClientEntityList* clientEntityList = nullptr;
-    CHLClient* chlClient = nullptr;
+    struct {
+        IEngineTrace *EngineTrace;
+        IClientEntityList* ClientEntityList = nullptr;
+        CHLClient* ChlClient = nullptr;
+        void* MatSystemSurface = nullptr;
+        void* ClientModeShared = nullptr;
+    } objs;
 
     ~Hack() {
         stop = true;
