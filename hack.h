@@ -70,10 +70,12 @@ public:
         bool velocityEsp = false;
         bool aimBot = false;
         bool bHop = true;
+        bool fakeAim = false;
+        bool friendlyFire = false;
     } settings;
 
     struct Buttons {
-        DWORD showMenuBtn = VK_INSERT;
+        DWORD showMenuBtn = VK_HOME;
         DWORD showTeammatesBtn = VK_F1;
         DWORD aimBotBtn = VK_F2;
         DWORD box2DBtn = VK_F3;

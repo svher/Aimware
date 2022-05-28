@@ -1,5 +1,4 @@
-﻿#include <iostream>
-#include "includes.h"
+﻿#include "includes.h"
 #include "thirdparty/x86RetSpoof.h"
 
 using CreateMoveFn = bool(__thiscall*)(void*, float, CUserCmd*);
@@ -13,8 +12,8 @@ ResetFn oReset = nullptr;
 CreateMoveFn oCreateMove = nullptr;
 LockCursorFn oLockCursor = nullptr;
 BYTE EndSceneByte[7]{ 0 };
-BYTE CreateMoveByte[9] {0};
 BYTE ResetByte[5] {0};
+BYTE CreateMoveByte[9] {0};
 BYTE LockCursorByte[7] {0};
 
 // D3D Hook Signature
@@ -37,7 +36,7 @@ bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, CUserCmd* cm
             cmd->buttons &= ~IN_JUMP;
         }
     }
-    return result;
+    return hack->settings.fakeAim ? false : result;
 }
 
 void __fastcall hkLockCursor(void *ecx, void *edx) {
@@ -50,7 +49,7 @@ void __fastcall hkLockCursor(void *ecx, void *edx) {
 }
 
 DWORD WINAPI DllAttach(HMODULE hModule) {
-#ifdef _DEBUG
+#ifdef CONSOLE
     AllocConsole();
     freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
     freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
@@ -88,12 +87,10 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     memcpy(LockCursorByte, lockCursorPtr, 7);
     oLockCursor = (LockCursorFn) TrampHook(lockCursorPtr, (BYTE*) hkLockCursor, 7);
 
-#ifdef _DEBUG
-    std::cout << "EndScene: 0x" << std::hex << d3d9Device[42] << std::endl;
-    std::cout << "Reset: 0x" << std::hex << d3d9Device[16] << std::endl;
-    std::cout << "CreateMove: 0x" << std::hex << (void*)createMovePtr << std::endl;
-    std::cout << "LockCursor: 0x" << std::hex << (void*)lockCursorPtr << std::endl;
-#endif
+    gui::EndScenePtr = d3d9Device[42];
+    gui::ResetPtr = d3d9Device[16];
+    gui::CreateMovePtr = createMovePtr;
+    gui::LockCursorPtr = lockCursorPtr;
 
     while(!GetAsyncKeyState(VK_END)) {
         hack->Update();
@@ -114,11 +111,13 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
 
 VOID WINAPI DllDetach() {
     delete(hack);
+#ifdef CONSOLE
     fclose((FILE*)stdin);
     fclose((FILE*)stdout);
     HWND hwConsole = GetConsoleWindow();
     FreeConsole();
     PostMessage(hwConsole, WM_CLOSE, 0, 0);
+#endif
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,

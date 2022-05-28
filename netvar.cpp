@@ -26,6 +26,6 @@ void Dump(const char *baseClass, RecvTable *table, uint32_t offset) {
         }
         const auto netvarName = std::format("{}->{}", baseClass, prop->m_pVarName);
         netvars[fnv::Hash(netvarName.c_str())] = offset + prop->m_Offset;
-        // std::cout << netvarName << ": 0x" << std::hex << (offset + prop->m_Offset) << std::endl;
+        namedNetvars[netvarName] = offset + prop->m_Offset;
     }
 }

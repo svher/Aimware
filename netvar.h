@@ -10,6 +10,7 @@ void SetupNetvars();
 void Dump(const char *baseClass, RecvTable *table, uint32_t offset = 0);
 
 inline std::unordered_map<uint32_t, uint32_t> netvars;
+inline std::map<std::string, uint32_t> namedNetvars;
 
 #define NETVAR(funcName, netvar, type) type& funcName() \
 {                                                       \

@@ -15,4 +15,9 @@ namespace gui {
     void Destroy() noexcept;
 
     void Render() noexcept;
+
+    inline void* EndScenePtr;
+    inline void* ResetPtr;
+    inline void* CreateMovePtr;
+    inline void* LockCursorPtr;
 }

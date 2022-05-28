@@ -40,6 +40,7 @@ HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
     D3DCOLOR enabled = D3DCOLOR_ARGB(255, 0, 255, 0);
     D3DCOLOR disabled = D3DCOLOR_ARGB(255, 255, 0, 0);
 
+#ifdef D3D9Menu
     if (hack->settings.showMenu) {
 
 #define DRAW_SETTINGS(name, index, setting) DrawTextWrapper(name, menuOffX, menuOffY + (index) * 12, (setting) ? enabled : disabled)
@@ -51,10 +52,11 @@ HRESULT APIENTRY hkEndScene(LPDIRECT3DDEVICE9 o_pDevice) {
         DRAW_SETTINGS("Headline ESP (F6)", 5, hack->settings.headline3D);
         DRAW_SETTINGS("Recoil Crosshair (F7)", 6, hack->settings.rcsCrossHair);
         DRAW_SETTINGS("Snaplines (F8)", 7, hack->settings.snapLines);
-        DrawTextWrapper("Hide Menu (INS)", menuOffX, menuOffY + 8 * 12, D3DCOLOR_ARGB(255, 255, 255, 255));
+        DrawTextWrapper("Hide Menu (Home)", menuOffX, menuOffY + 8 * 12, D3DCOLOR_ARGB(255, 255, 255, 255));
     } else {
-        DrawTextWrapper("Show Menu (INS)", menuOffX, menuOffY, D3DCOLOR_ARGB(255, 255, 255, 255));
+        DrawTextWrapper("Show Menu (Home)", menuOffX, menuOffY, D3DCOLOR_ARGB(255, 255, 255, 255));
     }
+#endif
 
     if (hack->localEntity != nullptr) {
         for (int i = 1; i < 32; i++) {

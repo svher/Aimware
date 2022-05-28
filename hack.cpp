@@ -1,6 +1,5 @@
 #include "includes.h"
 #include "x86RetSpoof.h"
-#include <iostream>
 
 void Hack::Init() {
     client = (uintptr_t)GetModuleHandle("client.dll");
@@ -21,9 +20,6 @@ void Hack::Init() {
     // search FF 23 in execution page
     // aka: jmp dword ptr [ebx]
     clientGadget = Memory::PatternScan((HMODULE)client, "FF 23 F8 F6 87 B1 03 00 00 02");
-#ifdef _DEBUG
-    std::cout << "Client clientGadget is: 0x" << std::hex << clientGadget << std::endl;
-#endif
     // start the loop
     stop = false;
 }
@@ -90,7 +86,7 @@ void Hack::Run(CUserCmd *cmd) const {
         if (!CheckValidEntity(entity)) {
             continue;
         }
-        if (entity->iTeamNum == localEntity->iTeamNum) {
+        if (!settings.friendlyFire && entity->iTeamNum == localEntity->iTeamNum) {
             continue;
         }
         entity->bSpotted = true;
