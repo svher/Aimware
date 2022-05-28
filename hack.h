@@ -71,6 +71,7 @@ public:
         bool aimBot = true;
         bool bHop = true;
         bool fakeAim = true;
+        bool autoFire = false;
         bool friendlyFire = true;
         bool recoilControl = true;
         float aimFovX = 15;

@@ -34,8 +34,9 @@ public:
         DEFINE_MEMBER_N(uint32_t, bSpottedByMask, m_bSpottedByMask);
         DEFINE_MEMBER_N(int, fFlags, m_fFlags);
         DEFINE_MEMBER_N(bool, bSpotted, m_bSpotted);
+        DEFINE_MEMBER_N(bool, bGunGameImmunity, m_bGunGameImmunity)
     };
-    NETVAR(_bSpotted, "CBaseEntity->m_bSpotted", bool)
+    NETVAR(_fImmuneToGunGameDamageTime, "CCSPlayer->m_fImmuneToGunGameDamageTime", float)
     Vec3* GetBonePos(int boneId) const;
 };
 

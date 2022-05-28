@@ -20,7 +20,7 @@ void gui::SetupMenu(LPDIRECT3DDEVICE9 pDevice) noexcept {
     oWindowProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WindowProc)));
 
     ImGui::CreateContext();
-    ImGui::StyleColorsDark();
+    ImGui::StyleColorsLight();
 
     ImGui_ImplWin32_Init(window);
     ImGui_ImplDX9_Init(pDevice);
@@ -38,7 +38,7 @@ void gui::Destroy() noexcept {
     }
 }
 
-bool cbNetvars = false;
+bool cbNetvars = true;
 bool showDemo = false;
 bool showSettings = true;
 
@@ -51,7 +51,7 @@ void gui::Render() noexcept {
         ImGui::ShowDemoWindow(&showDemo);
     }
     if (showSettings) {
-        if (ImGui::Begin("Settings", nullptr)) {
+        if (ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_NoCollapse)) {
             ImGui::Checkbox("Show Teammates (F1)", &hack->settings.showTeammates);
             ImGui::Checkbox("Aimbot (F2)", &hack->settings.aimBot);
             ImGui::Checkbox("2D Box (F3)", &hack->settings.box2D);
@@ -64,8 +64,12 @@ void gui::Render() noexcept {
             ImGui::Text("Misc");
             ImGui::Checkbox("Recoil Control", &hack->settings.recoilControl);
             ImGui::Checkbox("Fake Aim", &hack->settings.fakeAim);
+            ImGui::Checkbox("Auto Fire", &hack->settings.autoFire);
             ImGui::Checkbox("Friendly Fire", &hack->settings.friendlyFire);
-            ImGui::SliderFloat2("Aimbot FOV", &hack->settings.aimFovX, 1.f, 90.f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::Separator();
+            ImGui::Text("Aimbot");
+            ImGui::SliderFloat("Max Pitch", &hack->settings.aimFovX, 1.f, 90.f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("Max Yaw", &hack->settings.aimFovY, 1.f, 180.f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         }
         ImGui::End();
     }
@@ -81,21 +85,47 @@ void gui::Render() noexcept {
             }
             ImGui::Separator();
             ImGui::Text("General");
-            ImGui::BulletText("Client gadget 0x%08x", (uint32_t) hack->clientGadget);
-            ImGui::BulletText("Local entity 0x%08x", (uint32_t) hack->localEntity);
+            static std::map<std::string, uint32_t> misc;
+            misc["Client gadget"] = (uint32_t)hack->clientGadget;
+            misc["Local entity"] = (uint32_t)hack->localEntity;
+            if (ImGui::BeginTable("general", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+                ImGui::TableSetupColumn("Name");
+                ImGui::TableSetupColumn("Offset");
+                ImGui::TableHeadersRow();
+                for (auto it = misc.begin(); it != misc.end(); ++it) {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::Text("%s", it->first.c_str());
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Text("0x%08x", it->second);
+                }
+            }
+            ImGui::EndTable();
             ImGui::Separator();
             ImGui::Text("Hooks");
-            ImGui::BulletText("EndScene 0x%08x", (uint32_t) EndScenePtr);
-            ImGui::BulletText("Reset 0x%08x", (uint32_t) ResetPtr);
-            ImGui::BulletText("CreateMove 0x%08x", (uint32_t) CreateMovePtr);
-            ImGui::BulletText("LockCursor 0x%08x", (uint32_t) LockCursorPtr);
+            if (ImGui::BeginTable("hooks", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+                ImGui::TableSetupColumn("Name");
+                ImGui::TableSetupColumn("Offset");
+                ImGui::TableHeadersRow();
+                for (auto it = hooksAddr.begin(); it != hooksAddr.end(); ++it) {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::Text("%s", it->first.c_str());
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Text("0x%08x", (uint32_t)it->second);
+                }
+            }
+            ImGui::EndTable();
             ImGui::Separator();
             ImGui::Text("Netvars");
             ImGui::Checkbox("Show netvars offsets table", &cbNetvars);
             if (cbNetvars) {
                 static ImGuiTextFilter filter;
                 filter.Draw();
-                if (ImGui::BeginTable("netvars", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders)) {
+                if (ImGui::BeginTable("netvars", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+                    ImGui::TableSetupColumn("Name");
+                    ImGui::TableSetupColumn("Offset");
+                    ImGui::TableHeadersRow();
                     for (auto it = namedNetvars.begin(); it != namedNetvars.end(); ++it) {
                         if (filter.PassFilter(it->first.c_str())) {
                             ImGui::TableNextRow();

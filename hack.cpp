@@ -84,7 +84,7 @@ void Hack::AdjustViewAngle(CUserCmd *cmd) const {
         return;
     }
     // don't set viewangle when fakeAim is enabled
-    if (settings.fakeAim && !!!(cmd->buttons & IN_ATTACK)) {
+    if (settings.fakeAim && !!!(cmd->buttons & IN_ATTACK) && !settings.autoFire) {
         return;
     }
     float closetFOV = 10000;
@@ -103,6 +103,10 @@ void Hack::AdjustViewAngle(CUserCmd *cmd) const {
             if (!settings.friendlyFire && entity->iTeamNum == localEntity->iTeamNum) {
                 continue;
             }
+            // don't shot if player immune
+            if (entity->bGunGameImmunity) {
+                continue;
+            }
             entity->bSpotted = true;
             // slow but work in non-game thread
             // if (!(entity->bSpottedByMask & (1 << localEntityId))) {
@@ -119,22 +123,35 @@ void Hack::AdjustViewAngle(CUserCmd *cmd) const {
     }
     Vec3 newAngle = *viewAngle;
     bool shouldAim = hasEnemy && ABS(closetDeltaAngle.y) <= settings.aimFovY && ABS(closetDeltaAngle.x) <= settings.aimFovX;
-    if (settings.recoilControl && cmd->buttons & IN_ATTACK) {
+    if (settings.autoFire) {
+        static bool firing = false;
+        if (shouldAim) {
+            // TODO: Need a rate limiter
+            if (firing) {
+                cmd->buttons &= ~IN_ATTACK;
+            } else if (!firing) {
+                cmd->buttons |= IN_ATTACK;
+            }
+            firing = !firing;
+        } else if (firing) {
+            firing = false;
+            cmd->buttons &= ~IN_ATTACK;
+        }
+    }
+    if (settings.recoilControl) {
         static Vec3 oPunchAngle;
+        Vec3 punchAngle = localEntity->aimPunchAngle * 2.f;
         if (cmd->buttons & IN_ATTACK) {
             // REFERENCE: https://www.unknowncheats.me/wiki/Counter_Strike_Global_Offensive:Recoil_Compensation
             // refer to weapon_recoil_scale in console
-            Vec3 punchAngle = localEntity->aimPunchAngle * 2.f;
             // full or incremental calculation?
             if (settings.fakeAim || shouldAim) {
                 newAngle = newAngle - punchAngle;
             } else {
                 newAngle = newAngle + oPunchAngle - punchAngle;
             }
-            oPunchAngle = punchAngle;
-        } else {
-            oPunchAngle.Clear();
         }
+        oPunchAngle = punchAngle;
     }
     if (shouldAim) {
         newAngle = newAngle + closetDeltaAngle;

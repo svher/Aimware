@@ -1,5 +1,7 @@
 #pragma once
 #include <d3d9.h>
+#include <map>
+#include <string>
 
 namespace gui {
     inline bool open = true;
@@ -16,8 +18,5 @@ namespace gui {
 
     void Render() noexcept;
 
-    inline void* EndScenePtr;
-    inline void* ResetPtr;
-    inline void* CreateMovePtr;
-    inline void* LockCursorPtr;
+    inline std::map<std::string, void*> hooksAddr;
 }

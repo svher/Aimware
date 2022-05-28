@@ -85,10 +85,10 @@ DWORD WINAPI DllAttach(HMODULE hModule) {
     memcpy(LockCursorByte, lockCursorPtr, 7);
     oLockCursor = (LockCursorFn) TrampHook(lockCursorPtr, (BYTE*) hkLockCursor, 7);
 
-    gui::EndScenePtr = d3d9Device[42];
-    gui::ResetPtr = d3d9Device[16];
-    gui::CreateMovePtr = createMovePtr;
-    gui::LockCursorPtr = lockCursorPtr;
+    gui::hooksAddr["EndScene"] = d3d9Device[42];
+    gui::hooksAddr["Reset"] = d3d9Device[16];
+    gui::hooksAddr["CreateMove"] = createMovePtr;
+    gui::hooksAddr["LockCursor"] = lockCursorPtr;
 
     while(!GetAsyncKeyState(VK_END)) {
         hack->Update();
