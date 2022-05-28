@@ -40,7 +40,7 @@ void gui::Destroy() noexcept {
 
 bool cbNetvars = false;
 bool showDemo = false;
-bool showSettings = false;
+bool showSettings = true;
 
 void gui::Render() noexcept {
     ImGui_ImplDX9_NewFrame();
@@ -51,7 +51,7 @@ void gui::Render() noexcept {
         ImGui::ShowDemoWindow(&showDemo);
     }
     if (showSettings) {
-        if (ImGui::Begin("Settings")) {
+        if (ImGui::Begin("Settings", nullptr)) {
             ImGui::Checkbox("Show Teammates (F1)", &hack->settings.showTeammates);
             ImGui::Checkbox("Aimbot (F2)", &hack->settings.aimBot);
             ImGui::Checkbox("2D Box (F3)", &hack->settings.box2D);
@@ -62,8 +62,10 @@ void gui::Render() noexcept {
             ImGui::Checkbox("Snaplines (F8)", &hack->settings.snapLines);
             ImGui::Separator();
             ImGui::Text("Misc");
-            ImGui::Checkbox("FakeAim", &hack->settings.fakeAim);
+            ImGui::Checkbox("Recoil Control", &hack->settings.recoilControl);
+            ImGui::Checkbox("Fake Aim", &hack->settings.fakeAim);
             ImGui::Checkbox("Friendly Fire", &hack->settings.friendlyFire);
+            ImGui::SliderFloat2("Aimbot FOV", &hack->settings.aimFovX, 1.f, 90.f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
         }
         ImGui::End();
     }
@@ -79,7 +81,8 @@ void gui::Render() noexcept {
             }
             ImGui::Separator();
             ImGui::Text("General");
-            ImGui::BulletText("ClientGadget 0x%08x", (uint32_t) hack->clientGadget);
+            ImGui::BulletText("Client gadget 0x%08x", (uint32_t) hack->clientGadget);
+            ImGui::BulletText("Local entity 0x%08x", (uint32_t) hack->localEntity);
             ImGui::Separator();
             ImGui::Text("Hooks");
             ImGui::BulletText("EndScene 0x%08x", (uint32_t) EndScenePtr);

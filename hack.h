@@ -55,23 +55,26 @@ public:
     bool WorldToScreen(Vec3 position, Vec2& screen);
     Vec3* GetViewAngles() const;
     // aimbot
-    void Run(CUserCmd *cmd) const;
+    void AdjustViewAngle(CUserCmd *cmd) const;
     void CheckButtons();
 
     struct Settings {
         bool showMenu = true;
-        bool showTeammates = false;
+        bool showTeammates = true;
         bool snapLines = false;
         bool box2D = false;
         bool statusText = true;
-        bool box3D = false;
+        bool box3D = true;
         bool rcsCrossHair = false;
         bool headline3D = false;
         bool velocityEsp = false;
-        bool aimBot = false;
+        bool aimBot = true;
         bool bHop = true;
-        bool fakeAim = false;
-        bool friendlyFire = false;
+        bool fakeAim = true;
+        bool friendlyFire = true;
+        bool recoilControl = true;
+        float aimFovX = 15;
+        float aimFovY = 10;
     } settings;
 
     struct Buttons {

@@ -25,9 +25,7 @@ bool __fastcall hkCreateMove(void* ecx, void* edx, float frameTime, CUserCmd* cm
     if (!cmd || !cmd->command_number) {
         return result;
     }
-    if (hack->settings.aimBot) {
-        hack->Run(cmd);
-    }
+    hack->AdjustViewAngle(cmd);
     if (hack->settings.bHop && hack->localEntity) {
         /* BE AWARE OF Pointer Arithmetic
          *

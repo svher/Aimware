@@ -74,40 +74,75 @@ bool Hack::WorldToScreen(Vec3 position, Vec2 &screen) {
     return true;
 }
 
-void Hack::Run(CUserCmd *cmd) const {
+void Hack::AdjustViewAngle(CUserCmd *cmd) const {
+    // if neither feature is enabled, skip function
+    if (!settings.aimBot && !settings.recoilControl) {
+        return;
+    }
+    // skip if local player not exists
+    if (localEntity == nullptr) {
+        return;
+    }
+    // don't set viewangle when fakeAim is enabled
+    if (settings.fakeAim && !!!(cmd->buttons & IN_ATTACK)) {
+        return;
+    }
     float closetFOV = 10000;
     // DON'T USE GetViewAngles() HERE
     // if CreateMove returns true, then viewangles will be overridden by cmd->viewangles
     Vec3 closetDeltaAngle{};
     Vec3 *viewAngle = &cmd->viewangles;
-    for (int i = 1; i < 32; i++) {
-        Entity* entity = entityList->entities[i].entity;
-        // Entity* entity = clientEntityList->GetClientEntity(i+1);
-        if (!CheckValidEntity(entity)) {
-            continue;
-        }
-        if (!settings.friendlyFire && entity->iTeamNum == localEntity->iTeamNum) {
-            continue;
-        }
-        entity->bSpotted = true;
-        // slow but work in non-game thread
-        // if (!(entity->bSpottedByMask & (1 << localEntityId))) {
-        if (!TraceRay(entity)) {
-            continue;
-        }
-        Vec3 localViewPos = localEntity->vecViewOffset + localEntity->vecOrigin;
-        Vec3 deltaAngle = localViewPos.CalcAngles(*entity->GetBonePos(8)) - *viewAngle;
-        if (deltaAngle.Norm2D() < closetFOV) {
-            closetDeltaAngle = deltaAngle;
+    bool hasEnemy = false;
+    if (settings.aimBot) {
+        for (int i = 1; i < 32; i++) {
+            Entity *entity = entityList->entities[i].entity;
+            // Entity* entity = clientEntityList->GetClientEntity(i+1);
+            if (!CheckValidEntity(entity)) {
+                continue;
+            }
+            if (!settings.friendlyFire && entity->iTeamNum == localEntity->iTeamNum) {
+                continue;
+            }
+            entity->bSpotted = true;
+            // slow but work in non-game thread
+            // if (!(entity->bSpottedByMask & (1 << localEntityId))) {
+            if (!TraceRay(entity)) {
+                continue;
+            }
+            Vec3 localViewPos = localEntity->vecViewOffset + localEntity->vecOrigin;
+            Vec3 deltaAngle = localViewPos.CalcAngles(*entity->GetBonePos(8)) - *viewAngle;
+            if (deltaAngle.Norm2D() < closetFOV) {
+                hasEnemy = true;
+                closetDeltaAngle = deltaAngle;
+            }
         }
     }
-    if (!closetDeltaAngle.isZero()) {
-        Vec3 newAngle = closetDeltaAngle + *viewAngle;
-        if (newAngle.x >= -89 && newAngle.x <= 89 && newAngle.y >= -180 && newAngle.y <= 180) {
-            // why set dwClientState_ViewAngles not work in CreateMove?
-            viewAngle->x = newAngle.x;
-            viewAngle->y = newAngle.y;
+    Vec3 newAngle = *viewAngle;
+    bool shouldAim = hasEnemy && ABS(closetDeltaAngle.y) <= settings.aimFovY && ABS(closetDeltaAngle.x) <= settings.aimFovX;
+    if (settings.recoilControl && cmd->buttons & IN_ATTACK) {
+        static Vec3 oPunchAngle;
+        if (cmd->buttons & IN_ATTACK) {
+            // REFERENCE: https://www.unknowncheats.me/wiki/Counter_Strike_Global_Offensive:Recoil_Compensation
+            // refer to weapon_recoil_scale in console
+            Vec3 punchAngle = localEntity->aimPunchAngle * 2.f;
+            // full or incremental calculation?
+            if (settings.fakeAim || shouldAim) {
+                newAngle = newAngle - punchAngle;
+            } else {
+                newAngle = newAngle + oPunchAngle - punchAngle;
+            }
+            oPunchAngle = punchAngle;
+        } else {
+            oPunchAngle.Clear();
         }
+    }
+    if (shouldAim) {
+        newAngle = newAngle + closetDeltaAngle;
+    }
+    if (newAngle.x >= -89 && newAngle.x <= 89 && newAngle.y >= -180 && newAngle.y <= 180) {
+        // why set dwClientState_ViewAngles not work in CreateMove?
+        viewAngle->x = newAngle.x;
+        viewAngle->y = newAngle.y;
     }
 }
 
